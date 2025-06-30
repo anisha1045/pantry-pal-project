@@ -15,6 +15,8 @@ https://trackapi.nutritionix.com/v2/natural/nutrients
 '''
 import requests 
 import json
+from db import user_in_db, add_new_user, add_meal
+
 
 
 def validate_name(name):
@@ -66,23 +68,40 @@ nutrition("grape")
 print(" *\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t")
 print("  Welcome to your Pantry Pal! Let's work together today to meet your health needs <3 ")
 print(" *\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t\n")
+
+first_time = input("Is this your first time with us? Enter Y / N: ")
+if (first_time):
+    print("Yay, we're so glad you're here!")
+    username = input("To start, please enter a username: ")
+    while validate_name(username) == False and user_in_db(username):
+        if (user_in_db(username)):
+            username = input("That username was already taken. Please try again: ")
+        else:
+            username = input("You inputted an invalid username. Please try again: ")
+    sex = input("Enter your sex (F / M): ")
+    age = input("Enter your age (number): ")
+    allergies = input("Do you have any allergies we should be aware of? (eg. peanuts, lactose intolerance) Enter Y / N : ")
+    conditions = input("Do you have any conditions we should be aware of? (eg. diabetes, heart problems)  Enter Y / N: ")
+    restrictions = input("Do you have any dietary restrictions? (e.g. halal/ vegan/ kosher) Enter Y / N: ")
+    nutri_goal = input("Enter your nutrition goal: ")
+    add_new_user(username, sex, age, allergies, conditions, restrictions, nutri_goal, None)
+else: 
+    username = input("Please enter your username: ")
+    if (not user_in_db):
+        print("{username} was not found. Please try again.")
+    else:
+        print(f"Welcome back! It's great to see you, {username}")
+
+    
 # prompt user for necessary details
-name = input("Enter your name: ")
-while validate_name(name) == False:
-    name = input("Enter your name: ")
-sex = input("Enter your sex (F / M): ")
-age = input("Enter your age (number): ")
-allergies = input("Do you have any allergies we should be aware of? (eg. peanuts, lactose intolerance) Enter Y / N : ")
-conditions = input("Do you have any conditions we should be aware of? (eg. diabetes, heart problems)  Enter Y / N: ")
-restrictions = input("Do you have any dietary restrictions? (e.g. halal/ vegan/ kosher) Enter Y / N: ")
-nutri_goal = input("Enter your nutrition goal: ")
 
 #TODO: input validation 
 
 #TODO: save to database
 
 #Plan of action
-option = input(f"Hi {name}! Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)? ")
+keep_going = True
+option = input(f"Hi {username}! Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)? ")
 while (option != "m" and option != "n" and option != "q"):
     print(" EROORRRRRRRing ")
     option = input("Invalid input. Please try again. Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)?")
@@ -94,9 +113,10 @@ elif option == 'n':
     pass
 else:
     print("Thanks for chatting with us! Bye bye!")
+    keep_going = False
 
 
-while (True):
+while (keep_going):
     #TODO: meal suggestion or nutrition goal help
     option = input(f"Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or both(b)? ")
     while (option != 'm' and option != 'n' and option != 'q'):
@@ -108,3 +128,4 @@ while (True):
         pass
     else:
         print("Thanks for chatting with us! Bye bye!")
+        break
