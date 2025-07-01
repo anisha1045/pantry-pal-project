@@ -1,95 +1,121 @@
 import sqlite3
 
+def get_connection(test_mode=False):
+    if test_mode:
+        return sqlite3.connect(":memory:")
+    return sqlite3.connect("USER")
 
-conn = sqlite3.connect('USER_INFO')
-c = conn.cursor()
+def setup_db(conn):
+    c = conn.cursor()
 
-c.execute("""
-    CREATE TABLE IF NOT EXISTS user_info (
-        username TEXT PRIMARY KEY,
-        sex TEXT,
-        age INTEGER,
-        allergies TEXT,
-        conditions INTEGER,
-        restrictions TEXT,
-        nutri_goal TEXT,
-        daily_requirements TEXT
-    )
-""")
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS user_info (
+            user_id INTEGER PRIMARY KEY,
+            username TEXT,
+            sex TEXT,
+            age INTEGER,
+            allergies TEXT,
+            conditions INTEGER,
+            restrictions TEXT,
+            nutri_goal TEXT,
+            daily_requirements TEXT
+        )
+    """)
 
-c.execute("""
-    CREATE TABLE IF NOT EXISTS daily_requirements (
-        rec_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT, 
-        calories FLOAT,
-        protein FLOAT,
-        fat FLOAT,
-        carbs FLOAT,
-        fiber FLOAT,
-        vitamin_a FLOAT,
-        vitamin_c FLOAT,
-        vitamin_d FLOAT,
-        vitamin_e FLOAT,
-        vitamin_k FLOAT,
-        vitamin_b6 FLOAT,
-        vitamin_b12 FLOAT,
-        iron FLOAT,
-        calcium FLOAT,
-        magnesium FLOAT,
-        zinc FLOAT,
-        potassium FLOAT,
-        sodium FLOAT,
-        phosphorus FLOAT,
-        FOREIGN KEY(username) REFERENCES user_info(username)
-    )
-""")
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS meals (
+            meal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            date DATE,
+            calories FLOAT,
+            protein FLOAT,
+            fat FLOAT,
+            carbs FLOAT,
+            fiber FLOAT,
+            vitamin_a FLOAT,
+            vitamin_c FLOAT,
+            vitamin_d FLOAT,
+            vitamin_e FLOAT,
+            vitamin_k FLOAT,
+            vitamin_b6 FLOAT,
+            vitamin_b12 FLOAT,
+            iron FLOAT,
+            calcium FLOAT,
+            magnesium FLOAT,
+            zinc FLOAT,
+            potassium FLOAT,
+            sodium FLOAT,
+            phosphorus FLOAT,
+            FOREIGN KEY(user_id) REFERENCES user_info(user_id)
+        )
+    """)
 
-def user_in_db(username):
-    c.execute(f"SELECT * from user_info WHERE username = ?", (username,))
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS daily_requirements (
+            rec_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            calories FLOAT,
+            protein FLOAT,
+            fat FLOAT,
+            carbs FLOAT,
+            fiber FLOAT,
+            vitamin_a FLOAT,
+            vitamin_c FLOAT,
+            vitamin_d FLOAT,
+            vitamin_e FLOAT,
+            vitamin_k FLOAT,
+            vitamin_b6 FLOAT,
+            vitamin_b12 FLOAT,
+            iron FLOAT,
+            calcium FLOAT,
+            magnesium FLOAT,
+            zinc FLOAT,
+            potassium FLOAT,
+            sodium FLOAT,
+            phosphorus FLOAT,
+            FOREIGN KEY(user_id) REFERENCES user_info(user_id)
+        )
+    """)
+
     conn.commit()
-    rows = c.fetchall()
+    return conn
 
-    for row in rows:
-        print(row)
-    return c.fetchall() == None
-        
+def user_in_db(conn, username):
+    c = conn.cursor()
+    c.execute("SELECT 1 FROM user_info WHERE username = ?", (username,))
+    return c.fetchone() is not None
 
-def add_new_user(username, sex, age, allergies, conditions, restrictions, nutri_goal, daily_requirements):
+def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal, daily_requirements):
+    c = conn.cursor()
     c.execute("""
         INSERT INTO user_info (username, sex, age, allergies, conditions, restrictions, nutri_goal, daily_requirements)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (username, sex, age, allergies, conditions, restrictions, nutri_goal, daily_requirements))
     conn.commit()
-    rows = c.fetchall()
-
-    for row in rows:
-        print(row)
-    return user_in_db(username)
-
-
-def add_meal(username, calories, protein, fat, carbs, fiber, vitamin_a, vitamin_c, vitamin_d, vitamin_e, vitamin_k,
-    vitamin_b6, vitamin_b12, iron, calcium, magnesium, zinc, potassium, sodium, phosphorus):
-    print("IN ADD MEAL")
+    
+def add_meal(conn, user_id, calories, protein, fat, carbs, fiber, vitamin_a, vitamin_c, vitamin_d, vitamin_e, vitamin_k,
+            vitamin_b6, vitamin_b12, iron, calcium, magnesium, zinc, potassium, sodium, phosphorus):
+    c = conn.cursor()
     c.execute("""
-        INSERT INTO daily_requirements (
-            username, calories, protein, fat, carbs, fiber,
+        INSERT INTO meals (
+            user_id, date, calories, protein, fat, carbs, fiber,
             vitamin_a, vitamin_c, vitamin_d, vitamin_e, vitamin_k,
             vitamin_b6, vitamin_b12, iron, calcium, magnesium,
             zinc, potassium, sodium, phosphorus
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, CURRENT_DATE, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        username, calories, protein, fat, carbs, fiber,
+        user_id, calories, protein, fat, carbs, fiber,
         vitamin_a, vitamin_c, vitamin_d, vitamin_e, vitamin_k,
         vitamin_b6, vitamin_b12, iron, calcium, magnesium,
         zinc, potassium, sodium, phosphorus
     ))
     conn.commit()
-    rows = c.fetchall()
 
-    for row in rows:
-        print("ROW")
-        print(row)
+def get_meals_for_user(conn, user_id):
+    c = conn.cursor()
+    c.execute("SELECT * FROM meals WHERE user_id = ?", (user_id,))
+    return c.fetchall()
 
 def close():
     conn.close()

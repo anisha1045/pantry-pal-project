@@ -17,8 +17,6 @@ import requests
 import json
 from db import user_in_db, add_new_user, add_meal
 
-
-
 def validate_name(name):
     if (name.isdigit()):
         return False
