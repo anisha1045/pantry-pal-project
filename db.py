@@ -92,6 +92,22 @@ def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (username, sex, age, allergies, conditions, restrictions, nutri_goal, daily_requirements))
     conn.commit()
+
+
+def get_user_info(conn, username):
+    c = conn.cursor()
+    c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
+    return c.fetchall()
+
+
+def get_user_info(conn, username):
+    c = conn.cursor()
+    c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
+    row = c.fetchone()
+    if row:
+        columns = [col[0] for col in c.description]
+        return dict(zip(columns, row))
+    return None
     
 def add_meal(conn, user_id, calories, protein, fat, carbs, fiber, vitamin_a, vitamin_c, vitamin_d, vitamin_e, vitamin_k,
             vitamin_b6, vitamin_b12, iron, calcium, magnesium, zinc, potassium, sodium, phosphorus):
