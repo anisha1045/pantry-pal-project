@@ -15,7 +15,7 @@ https://trackapi.nutritionix.com/v2/natural/nutrients
 '''
 import requests
 import json
-import db
+import db 
 
 def validate_name(name):
     if (name.isdigit()):
@@ -66,7 +66,6 @@ def get_daily_requirement(user_info):
     user_info.pop('user_id')
     user_info.pop('username')
     user_info.pop('allergies')
-    user_info.pop('daily_requirements')
 
     daily_requirements = [
         "calories", "protein", "fat", "carbs", "fiber",
@@ -86,11 +85,69 @@ def get_daily_requirement(user_info):
             {"role": "system", "content": f"Generate a dictionary for daily requirements of the following: {daily_requirements} based on this user: {user_info}"}
         ]
     }
+    #TODO: write system message in chat array explaining the assistant is a nutrition expert 
 
-    response = requests.post(url, headers=headers, json=data)
-    print(response.json())
+    #response = requests.post(url, headers=headers, json=data)
+    #print(response.json())
     # string is in the format of a dictionary
-    returned_string = response.json()['choices']['message']['content']
+    returned_json = {
+        'choices': [
+            {
+                'index': 0,
+                'message': {
+                    'role': 'assistant',
+                    'content': """{
+        'calories': 1600,
+        'protein': 60,
+        'fat': 40,
+        'carbs': 200,
+        'fiber': 30,
+        'vitamin_a': 700,
+        'vitamin_c': 75,
+        'vitamin_d': 600,
+        'vitamin_e': 15,
+        'vitamin_k': 90,
+        'vitamin_b6': 1.3,
+        'vitamin_b12': 2.4,
+        'iron': 18,
+        'calcium': 1000,
+        'magnesium': 310,
+        'zinc': 8,
+        'potassium': 4700,
+        'sodium': 2300,
+        'phosphorus': 700
+    }"""
+                },
+                'refusal': None,
+                'annotations': []
+            }
+        ],
+        'id': 'chatcmpl-Box05FwrwbxeUprF3jxJdFRGZouNJ',
+        'object': 'chat.completion',
+        'created': 1751482897,
+        'model': 'gpt-3.5-turbo-0125',
+        'usage': {
+            'prompt_tokens': 140,
+            'completion_tokens': 169,
+            'total_tokens': 309,
+            'prompt_tokens_details': {'cached_tokens': 0, 'audio_tokens': 0},
+            'completion_tokens_details': {
+                'reasoning_tokens': 0,
+                'audio_tokens': 0,
+                'accepted_prediction_tokens': 0,
+                'rejected_prediction_tokens': 0
+            }
+        },
+        'service_tier': 'default',
+        'system_fingerprint': None
+    }
+
+    
+    #returned_json = response.json()['choices'][0]['message']['content']
+    #return returned_json
+    
+    return returned_json['choices'][0]['message']['content']
+
 
 #welcome user
 print(" *\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t")
@@ -100,8 +157,8 @@ print(" *\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t\n")
 
 # set up database and connection
 
-conn = db.get_connection(test_mode=True)
-db.setup_db(conn)
+con = db.get_connection(test_mode=False)
+conn = db.setup_db(con)
 db.add_new_user(
             conn,
             username="Alisha",
@@ -110,71 +167,95 @@ db.add_new_user(
             allergies="none",
             conditions=0,
             restrictions="vegan",
-            nutri_goal="lose weight",
-            daily_requirements=None
+            nutri_goal="lose weight"
         )
 user_info = db.get_user_info(conn, "Alisha")
 print(user_info)
 get_daily_requirement(user_info)
 
+first_time = input("Is this your first time with us? Enter Y / N: ")
+if (first_time):
+    print("Yay, we're so glad you're here!")
+    #get username
+    username = input("To start, please enter a username: ")
+    while validate_name(username) == False and user_in_db(conn, username):
+        if (user_in_db(conn, username)):
+            username = input("That username was already taken. Please try again: ")
+        else:
+            username = input("You inputted an invalid username. Please try again: ")
+    #get sex
+    sex = input("Enter your sex (F / M): ") 
+    while sex_validation(sex) == False:
+        sex = input("Wrong format inputted, please enter F or M: ")
+    # get age 
+    age = input("Enter your age (number): ")
+    while age_validation(age) == False:
+        age = input("Age input invalid, please try again (insert digits): ")
+    #get allergies
+    allergies = input("Do you have any allergies we should be aware of? (eg. peanuts) Enter Y / N : ")
+    while open_ended_validation(allergies) == False:
+        allergies = input("Allergy input is invalid, please try again: ")
+    if allergies == "Y" or allergies == "y":
+        allergies = input("What are you allergic to? ")
+    #get conditions
+    conditions = input("Do you have any conditions we should be aware of? (eg. diabetes, heart problems)  Enter Y / N: ")
+    while open_ended_validation(conditions) == False:
+        conditions = input("Conditions input is invalid, please try again: ")
+    if conditions == "Y" or conditions == "y":
+        conditions = input("What are your conditions? ")
+    #get restrictions
+    restrictions = input("Do you have any dietary restrictions? (e.g. halal/ vegan/ kosher) Enter Y / N: ")
+    while open_ended_validation(restrictions) == False:
+        restrictions = input("Restrictions input is invalid, please try again: ")
+    if restrictions == "Y" or restrictions == "y":
+        restrictions = input("What are your restrictions? ")
+    #get nutrition goals 
+    nutri_goal = input("Enter your nutrition goal: ")
+    #add user to USER database
+    add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal, None)
+    #add their daily requirments to daily_requirments database
+    user_info = db.get_user_info(conn, username)
+    user_id = user_info["user_id"]
 
-# first_time = input("Is this your first time with us? Enter Y / N: ")
-# if (first_time):
-#     print("Yay, we're so glad you're here!")
-#     username = input("To start, please enter a username: ")
-#     while validate_name(username) == False and user_in_db(username):
-#         if (user_in_db(username)):
-#             username = input("That username was already taken. Please try again: ")
-#         else:
-#             username = input("You inputted an invalid username. Please try again: ")
-#     sex = input("Enter your sex (F / M): ")
-#     age = input("Enter your age (number): ")
-#     allergies = input("Do you have any allergies we should be aware of? (eg. peanuts, lactose intolerance) Enter Y / N : ")
-#     conditions = input("Do you have any conditions we should be aware of? (eg. diabetes, heart problems)  Enter Y / N: ")
-#     restrictions = input("Do you have any dietary restrictions? (e.g. halal/ vegan/ kosher) Enter Y / N: ")
-#     nutri_goal = input("Enter your nutrition goal: ")
-#     add_new_user(username, sex, age, allergies, conditions, restrictions, nutri_goal, None)
-# else: 
-#     username = input("Please enter your username: ")
-#     if (not user_in_db):
-#         print("{username} was not found. Please try again.")
-#     else:
-#         print(f"Welcome back! It's great to see you, {username}")
+    daily_reqs = get_daily_requirement(user_info)
+    db.add_daily_requirements(conn, user_id, daily_reqs)
 
-    
-# # prompt user for necessary details
-
-# #TODO: input validation 
-
-# #TODO: save to database
-
-# #Plan of action
-# keep_going = True
-# option = input(f"Hi {username}! Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)? ")
-# while (option != "m" and option != "n" and option != "q"):
-#     print(" EROORRRRRRRing ")
-#     option = input("Invalid input. Please try again. Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)?")
-
-# if option == 'm':
-#     eaten = input("What did you eat today? (eg: three eggs, muffin): ")
-#     nutrition(eaten)
-# elif option == 'n':
-#     pass
-# else:
-#     print("Thanks for chatting with us! Bye bye!")
-#     keep_going = False
+else: 
+    username = input("Please enter your username: ")
+    if (not user_in_db(conn, username)):
+        print("{username} was not found. Please try again.")
+    else:
+        print(f"Welcome back! It's great to see you, {username}")
 
 
-# while (keep_going):
-#     #TODO: meal suggestion or nutrition goal help
-#     option = input(f"Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or both(b)? ")
-#     while (option != 'm' and option != 'n' and option != 'q'):
-#         option = input("Invalid input. Please try again. Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)?")
+#Plan of action
+keep_going = True
+option = input(f"Hi {username}! Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)? ")
+while (option != "m" and option != "n" and option != "q"):
+    print(" EROORRRRRRRing ")
+    option = input("Invalid input. Please try again. Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)?")
 
-#     if option == 'm':
-#         pass
-#     elif option == 'n':
-#         pass
-#     else:
-#         print("Thanks for chatting with us! Bye bye!")
-#         break
+if option == 'm':
+    #eaten = input("What did you eat today? (eg: three eggs, muffin): ")
+    nutrition(eaten)
+elif option == 'n':
+    #eaten = input("What did you eat today? (eg: three eggs, muffin): ")
+    nutrition(eaten)
+else:
+    print("Thanks for chatting with us! Bye bye!")
+    keep_going = False
+
+
+while (keep_going):
+    #TODO: meal suggestion or nutrition goal help
+    option = input(f"Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)? ")
+    while (option != 'm' and option != 'n' and option != 'q'):
+        option = input("Invalid input. Please try again. Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)?")
+
+    if option == 'm':
+        pass
+    elif option == 'n':
+        pass
+    else:
+        print("Thanks for chatting with us! Bye bye!")
+        break

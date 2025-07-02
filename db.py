@@ -17,8 +17,7 @@ def setup_db(conn):
             allergies TEXT,
             conditions INTEGER,
             restrictions TEXT,
-            nutri_goal TEXT,
-            daily_requirements TEXT
+            nutri_goal TEXT
         )
     """)
 
@@ -85,12 +84,12 @@ def user_in_db(conn, username):
     c.execute("SELECT 1 FROM user_info WHERE username = ?", (username,))
     return c.fetchone() is not None
 
-def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal, daily_requirements):
+def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal):
     c = conn.cursor()
     c.execute("""
-        INSERT INTO user_info (username, sex, age, allergies, conditions, restrictions, nutri_goal, daily_requirements)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (username, sex, age, allergies, conditions, restrictions, nutri_goal, daily_requirements))
+        INSERT INTO user_info (username, sex, age, allergies, conditions, restrictions, nutri_goal)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (username, sex, age, allergies, conditions, restrictions, nutri_goal))
     conn.commit()
 
 
@@ -132,6 +131,39 @@ def get_meals_for_user(conn, user_id):
     c = conn.cursor()
     c.execute("SELECT * FROM meals WHERE user_id = ?", (user_id,))
     return c.fetchall()
+
+def add_daily_requirements(conn, user_id, requirements_dict):
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO daily_requirements (
+            user_id, calories, protein, fat, carbs, fiber,
+            vitamin_a, vitamin_c, vitamin_d, vitamin_e, vitamin_k,
+            vitamin_b6, vitamin_b12, iron, calcium, magnesium,
+            zinc, potassium, sodium, phosphorus
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        user_id,
+        requirements_dict['calories'],
+        requirements_dict['protein'],
+        requirements_dict['fat'],
+        requirements_dict['carbs'],
+        requirements_dict['fiber'],
+        requirements_dict['vitamin_a'],
+        requirements_dict['vitamin_c'],
+        requirements_dict['vitamin_d'],
+        requirements_dict['vitamin_e'],
+        requirements_dict['vitamin_k'],
+        requirements_dict['vitamin_b6'],
+        requirements_dict['vitamin_b12'],
+        requirements_dict['iron'],
+        requirements_dict['calcium'],
+        requirements_dict['magnesium'],
+        requirements_dict['zinc'],
+        requirements_dict['potassium'],
+        requirements_dict['sodium'],
+        requirements_dict['phosphorus']
+    ))
+    conn.commit()
 
 def close():
     conn.close()

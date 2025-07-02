@@ -1,6 +1,6 @@
 import unittest
 import db 
-
+from main import validate_name
 class TestPantryPalDB(unittest.TestCase):
 
     def setUp(self):
@@ -59,6 +59,10 @@ class TestPantryPalDB(unittest.TestCase):
         meals = db.get_meals_for_user(self.conn, user_id)
         self.assertEqual(len(meals), 1)
         self.assertAlmostEqual(float(meals[0][3]), 700)  # calories
+    
+    def test_wrong_name(self): 
+        name = "123"
+        self.assertFalse(validate_name(name))
 
 if __name__ == '__main__':
     unittest.main()
