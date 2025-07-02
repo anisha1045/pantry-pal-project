@@ -86,11 +86,14 @@ def user_in_db(conn, username):
 
 def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal):
     c = conn.cursor()
-    c.execute("""
-        INSERT INTO user_info (username, sex, age, allergies, conditions, restrictions, nutri_goal)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (username, sex, age, allergies, conditions, restrictions, nutri_goal))
-    conn.commit()
+    try:
+        c.execute("""
+            INSERT INTO user_info (username, sex, age, allergies, conditions, restrictions, nutri_goal)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (username, sex, int(age), allergies, str(conditions), restrictions, nutri_goal))
+        conn.commit()
+    except Exception as e:
+        print("Error adding user:", e)
 
 
 def get_user_info(conn, username):
