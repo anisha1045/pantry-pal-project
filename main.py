@@ -15,7 +15,9 @@ https://trackapi.nutritionix.com/v2/natural/nutrients
 '''
 import requests 
 import json
-from db import user_in_db, add_new_user, add_meal
+from db import get_connection, setup_db, user_in_db, add_new_user, add_meal
+
+conn = setup_db(get_connection())
 
 def validate_name(name):
     if (name.isdigit()):
@@ -82,7 +84,7 @@ if (first_time):
     conditions = input("Do you have any conditions we should be aware of? (eg. diabetes, heart problems)  Enter Y / N: ")
     restrictions = input("Do you have any dietary restrictions? (e.g. halal/ vegan/ kosher) Enter Y / N: ")
     nutri_goal = input("Enter your nutrition goal: ")
-    add_new_user(username, sex, age, allergies, conditions, restrictions, nutri_goal, None)
+    add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal, None)
 else: 
     username = input("Please enter your username: ")
     if (not user_in_db):
@@ -116,7 +118,7 @@ else:
 
 while (keep_going):
     #TODO: meal suggestion or nutrition goal help
-    option = input(f"Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or both(b)? ")
+    option = input(f"Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)? ")
     while (option != 'm' and option != 'n' and option != 'q'):
         option = input("Invalid input. Please try again. Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)?")
 
