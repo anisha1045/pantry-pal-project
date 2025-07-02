@@ -81,7 +81,7 @@ def setup_db(conn):
 
 def user_in_db(conn, username):
     c = conn.cursor()
-    c.execute("SELECT 1 FROM user_info WHERE username = ?", (username,))
+    c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
     return c.fetchone() is not None
 
 def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal):
@@ -108,8 +108,7 @@ def get_user_info(conn, username):
         return dict(zip(columns, row))
     return None
     
-def add_meal(conn, user_id, calories, protein, fat, carbs, fiber, vitamin_a, vitamin_c, vitamin_d, vitamin_e, vitamin_k,
-            vitamin_b6, vitamin_b12, iron, calcium, magnesium, zinc, potassium, sodium, phosphorus):
+def add_meal(conn, user_id, nutrients):
     c = conn.cursor()
     c.execute("""
         INSERT INTO meals (
@@ -119,12 +118,7 @@ def add_meal(conn, user_id, calories, protein, fat, carbs, fiber, vitamin_a, vit
             zinc, potassium, sodium, phosphorus
         )
         VALUES (?, CURRENT_DATE, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        user_id, calories, protein, fat, carbs, fiber,
-        vitamin_a, vitamin_c, vitamin_d, vitamin_e, vitamin_k,
-        vitamin_b6, vitamin_b12, iron, calcium, magnesium,
-        zinc, potassium, sodium, phosphorus
-    ))
+    """, (user_id, *nutrients))
     conn.commit()
 
 def get_meals_for_user(conn, user_id):
@@ -132,7 +126,12 @@ def get_meals_for_user(conn, user_id):
     c.execute("SELECT * FROM meals WHERE user_id = ?", (user_id,))
     return c.fetchall()
 
-def add_daily_requirements(conn, user_id, requirements_dict):
+def get_meals_for_today(conn, user_id, today):
+    c = conn.cursor()
+    c.execute("SELECT * FROM meals WHERE user_id = ? AND date = ?", (user_id, today,))
+    return c.fetchall()
+
+def save_daily_reqs(conn, user_id, requirements_dict):
     c = conn.cursor()
     c.execute("""
         INSERT INTO daily_requirements (
@@ -164,6 +163,12 @@ def add_daily_requirements(conn, user_id, requirements_dict):
         requirements_dict['phosphorus']
     ))
     conn.commit()
+
+# returns a user's daily requirements given their username
+def get_daily_reqs(conn, user_id):
+    c = conn.cursor()
+    c.execute("SELECT * FROM daily_requirements WHERE user_id = ?", (user_id,))
+    return c.fetchall()
 
 def close():
     conn.close()
