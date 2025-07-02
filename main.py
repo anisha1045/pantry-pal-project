@@ -115,7 +115,6 @@ else:
     print("Thanks for chatting with us! Bye bye!")
     keep_going = False
 
-
 while (keep_going):
     #TODO: meal suggestion or nutrition goal help
     option = input(f"Would you like a meal suggestion (m) or help meeting nutrition goals (n) for today? Or quit(q)? ")
