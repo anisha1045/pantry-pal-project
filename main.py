@@ -128,17 +128,16 @@ def print_meal_response(suggested_meal, ideal_meal, evaluation, tips):
         print(f"  💡 Tip {i}: {tip}")
     print(stars)
 
-def print_nutrient_breakdown(remaining):
+def print_nutrient_breakdown(rem_dict):
     divider = "~" * 60
     hearts_banner = "♥" * 10 + " Remaining Nutrients " + "♥" * 10
     stars = r"✧･ﾟ: *✧･ﾟ:* 　　 *:･ﾟ✧*:･ﾟ✧"
 
     print(hearts_banner.center(len(divider)))
     print(divider)
-
     for i in range(len(NUTRIENTS)):
         nutrient = NUTRIENTS[i]
-        amount = remaining[i]
+        amount = rem_dict[nutrient]
         print(f"  ♥ {nutrient:<15} : {amount:>7}")
 
     print(divider)
@@ -228,9 +227,11 @@ def one_time_setup(conn):
     print("Yay, we're so glad you're here!")
     #get username
     username = input("To start, please enter a username: ")
-    while validate_name(username) == False and db.user_in_db(conn, username):
-        if (db.user_in_db(conn, username)):
+    user_in_db = db.user_in_db(conn, username)
+    while ((not validate_name(username)) or (user_in_db)):
+        if (user_in_db):
             username = input("That username was already taken. Please try again: ")
+            user_in_db = db.user_in_db(conn, username)
         else:
             username = input("Username input invalid. Please try again: ")
         
@@ -302,13 +303,16 @@ def log_meal(conn, username, user_ate):
     return user_ate
 
 def say_goodbye():
-    print()
-    print("✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧")
-    print("|     Thanks for using Pantry Pal!     |")
-    print("|   Wishing you health & good meals ✿  |")
-    print("|                                      |")
-    print("|        ✦ See you again soon! ✦      |")
-    print("✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧")
+    goodbye = r"""
+   ・。.・゜✭・.・✫・゜・。. ✧･ﾟ: *✧･ﾟ:* ✫*:･ﾟ✧*:･ﾟ✧ .・。.・゜✭・.・✫
+
+          (｡♥‿♥｡) Thanks for using Pantry Pal!
+          Wishing you health & good meals ✿
+               ✦ See you again soon! ✦
+
+   .・。.・゜✭・.・✫・゜・。. ✧･ﾟ: *✧･ﾟ:* ✫*:･ﾟ✧*:･ﾟ✧ .・。.・゜✭・.・✫
+    """
+    print(goodbye)
 
 # MAIN PROGRAM HERE
 # welcome user
@@ -352,4 +356,4 @@ while (True):
             meal_suggestion(conn)
         elif option == "n":
             rem_dict = nutrient_breakdown(conn, username)
-            print_nutrient_breakdown(rem_dict.values())
+            print_nutrient_breakdown(rem_dict)
