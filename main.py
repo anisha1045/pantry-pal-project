@@ -39,7 +39,7 @@ def open_ended_validation(user_input):
 
 def meal_suggestion(conn):
     # ask user for things they have in their fridge
-    ingredients = input("What ingredients do you have? Enter as a string separated by a single space. eg: oats, bananas, apples: ")
+    ingredients = input("What ingredients do you have? Enter as a string separated by a comma and a single space. eg: oats, bananas, apples: ")
     # get remaining nutrients from nutri_goals
     rem_nutrients = nutrient_breakdown(conn, username)
     # ask chat for:
@@ -161,9 +161,11 @@ def nutrient_breakdown(conn, username):
 
     # subtract and return
     remaining = list(new_daily_req)
+
     for meal in new_meals:
         for i in range(len(remaining)):
-            remaining[i] = remaining[i] - meal[i]
+            if (meal[i] != None):
+                remaining[i] = remaining[i] - int(meal[i])
 
     rem_dict = {NUTRIENTS[i]: remaining[i] for i in range(len(NUTRIENTS))}
     # display the remaining with the nutrients
@@ -197,7 +199,6 @@ def nutrition(eaten):
 
 # ask chat for a user's daily requirements - takes in a dict with the user's info 
 def get_daily_requirement(user_info):
-    # TODO: make get_user_info return a dict
 
     daily_requirements = [
         "calories", "protein", "fat", "carbs", "fiber",
@@ -214,7 +215,7 @@ def get_daily_requirement(user_info):
     data = {
         "model": "gpt-3.5-turbo",
         "messages": [
-            {"role": "system", "content": f"Generate a dictionary for daily requirements of the following: {daily_requirements} based on this user: {user_info}"}
+            {"role": "system", "content": f"Generate a dictionary of ints for daily requirements of the following: {daily_requirements} based on this user: {user_info}. Do not include units."}
         ]
     }
 
@@ -356,4 +357,5 @@ while (True):
             meal_suggestion(conn)
         elif option == "n":
             rem_dict = nutrient_breakdown(conn, username)
+            print()
             print_nutrient_breakdown(rem_dict)

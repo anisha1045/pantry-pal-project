@@ -15,7 +15,7 @@ def setup_db(conn):
             sex TEXT,
             age INTEGER,
             allergies TEXT,
-            conditions INTEGER,
+            conditions TEXT,
             restrictions TEXT,
             nutri_goal TEXT
         )
