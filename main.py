@@ -11,6 +11,7 @@ from datetime import date
 
 NUTRIENTS = ["calories", "protein", "fat", "carbs", "fiber", "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
  "vitamin_b6", "vitamin_b12", "iron", "calcium", "magnesium", "zinc", "potassium", "sodium", "phosphorus"]
+UNITS = ["kcal", "g", "g", "g", "g", "µg", "mg", "µg", "mg", "µg", "mg", "µg", "mg", "mg", "mg", "mg", "mg", "mg", "mg"]
 ATTR_IDS = [208, 203, 204, 205, 291, 318, 401, 324, 323, 430, 415, 418, 303, 301, 304, 309, 306, 307, 305]
 
 def validate_name(name):
@@ -138,7 +139,8 @@ def print_nutrient_breakdown(rem_dict):
     for i in range(len(NUTRIENTS)):
         nutrient = NUTRIENTS[i]
         amount = rem_dict[nutrient]
-        print(f"  ♥ {nutrient:<15} : {amount:>7}")
+        unit = UNITS[i]
+        print(f"  ♥ {nutrient:<15} : {amount:>6} {unit}")
 
     print(divider)
     print(stars)
