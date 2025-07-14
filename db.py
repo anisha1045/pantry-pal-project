@@ -129,7 +129,7 @@ def get_meals_for_user(conn, user_id):
     c.execute("SELECT * FROM meals WHERE user_id = ?", (user_id,))
     return c.fetchall()
 
-def get_meals_for_today(conn, user_id, today):
+def get_meals_for_day(conn, user_id, today):
     c = conn.cursor()
     c.execute("SELECT * FROM meals WHERE user_id = ? AND date = ?", (user_id, today,))
     return c.fetchall()
