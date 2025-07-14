@@ -7,7 +7,7 @@ import requests
 import json
 import db 
 import ast
-from datetime import date
+from datetime import date, timedelta
 
 NUTRIENTS = ["calories", "protein", "fat", "carbs", "fiber", "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
  "vitamin_b6", "vitamin_b12", "iron", "calcium", "magnesium", "zinc", "potassium", "sodium", "phosphorus"]
@@ -42,7 +42,7 @@ def meal_suggestion(conn):
     # ask user for things they have in their fridge
     ingredients = input("What ingredients do you have? Enter as a string separated by a comma and a single space. eg: oats, bananas, apples: ")
     # get remaining nutrients from nutri_goals
-    rem_nutrients = nutrient_breakdown(conn, username)
+    rem_nutrients = nutrient_breakdown(conn, username, recent_days=1)
     # ask chat for:
     # suggested meal, ideal meal, a sentence of feedback regarding groceries, and tips such as what to and not to consume to maximize absorption
     prompt = f"""
@@ -145,31 +145,36 @@ def print_nutrient_breakdown(rem_dict):
     print(divider)
     print(stars)
 
-def nutrient_breakdown(conn, username):
+# returns a dict of keys (nutrients) and values (a tuple with consumed amount, required amount, and unit)
+def nutrient_breakdown(conn, username, recent_days=1):
 
     user_id = get_user_id(conn, username)
 
     # get the user's daily requirements
     daily_req = db.get_daily_reqs(conn, user_id)[0]
 
+    print("DAILY REQ", daily_req)
+
     # remove the first two (rec_id and user_id)
     new_daily_req = daily_req[2:]
-    # add up all nutrients so far
-    today = date.today().isoformat()
-    meals_so_far = db.get_meals_for_today(conn, user_id, today)
+    day = date.today()
+    rem_dict = {}
+    for k in range(len(NUTRIENTS)):
+        rem_dict[NUTRIENTS[k]] = [0, new_daily_req[k] * 7, UNITS[k]]
+    for i in range(1, recent_days):
+        # add up all nutrients so far
+        if (i != 1):
+            day = date.today() - timedelta(days=i - 1)
 
-    # remove the first three (meal_id, user_id, and date)
-    new_meals = [t[3:] for t in list(meals_so_far)]
+        print(day.isoformat())
+        meals_so_far = db.get_meals_for_day(conn, user_id, day.isoformat())
+        print("MEALS SO FAR", meals_so_far)
+        # remove the first three (meal_id, user_id, and date)
+        new_meals = [t[3:] for t in list(meals_so_far)]
 
-    # subtract and return
-    remaining = list(new_daily_req)
-
-    for meal in new_meals:
-        for i in range(len(remaining)):
-            if (meal[i] != None):
-                remaining[i] = remaining[i] - int(meal[i])
-
-    rem_dict = {NUTRIENTS[i]: remaining[i] for i in range(len(NUTRIENTS))}
+        for meal in new_meals:
+            for j in range(len(NUTRIENTS)):
+                rem_dict[NUTRIENTS[j]][0] += meal[j] if meal[j] is not None else 0
     # display the remaining with the nutrients
     return rem_dict
 
@@ -201,7 +206,7 @@ def nutrition(eaten):
 
 # ask chat for a user's daily requirements - takes in a dict with the user's info 
 def get_daily_requirement(user_info):
-
+    print(user_info)
     daily_requirements = [
         "calories", "protein", "fat", "carbs", "fiber",
         "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
@@ -217,13 +222,35 @@ def get_daily_requirement(user_info):
     data = {
         "model": "gpt-3.5-turbo",
         "messages": [
-            {"role": "system", "content": f"Generate a dictionary of ints for daily requirements of the following: {daily_requirements} based on this user: {user_info}. Do not include units."}
+            {"role": "system", "content": f"""Generate a dict of ints for daily needs of: {daily_requirements}, personalized for: {user_info}. No units.
+
+            For any nutrient changed from standard values, also give:
+            - default value
+            - new value
+            - short reason
+
+            Format:
+            {{
+            "daily_requirements": {{}},
+            "adjustments": {{
+                "NutrientX": {{"default": x, "personalized": y, "explanation": "..."}}
+            }}
+            }}
+            """}
         ]
     }
 
     response = requests.post(url, headers=headers, json=data)
+    print("Response from OpenAI API:")
+    print(response.json())
+
     returned_json = response.json()['choices'][0]['message']['content']
-    
+#     daily_requirements = parsed_content['daily_requirements']
+# adjustments = parsed_content['adjustments']
+
+# # Example usage
+# print("Daily Requirements:", daily_requirements)
+# print("Adjustments:", adjustments)
     return returned_json
     
 def one_time_setup(conn):
@@ -277,12 +304,21 @@ def one_time_setup(conn):
     
     # add their daily requirments to daily_requirments database
     user_info = db.get_user_info(conn, username)
-    user_id = user_info['user_id']
+    user_id = user_info.pop('user_id')
+    user_info.pop('username')
+    user_info.pop('restrictions')
     reqs = get_daily_requirement(user_info)
+
     real_dict = ast.literal_eval(reqs)
-    
-    db.save_daily_reqs(conn, user_id, real_dict)
-    return username
+    print(real_dict)
+    daily_reqs = real_dict['daily_requirements']
+    adjustments = real_dict['adjustments']
+
+    print("Daily Requirements:", daily_reqs)
+    print("Adjustments:", adjustments)
+
+    db.save_daily_reqs(conn, user_id, daily_reqs)
+    return username, adjustments
 
 def log_meal(conn, username, user_ate):
     if (not user_ate):
@@ -303,7 +339,11 @@ def log_meal(conn, username, user_ate):
         user_id = user_info["user_id"]
         # add this meal to the db with add_meal()
         db.add_meal(conn, user_id, nutrients)
+        meals = db.get_meals_for_user(conn, user_id)
+        print("MEALS")
+        print(meals)
     return user_ate
+    
 
 def say_goodbye():
     goodbye = r"""
@@ -360,4 +400,12 @@ while (True):
         elif option == "n":
             rem_dict = nutrient_breakdown(conn, username)
             print()
-            print_nutrient_breakdown(rem_dict)
+            print("REM DICT: ", rem_dict)
+            # print_nutrient_breakdown(rem_dict)
+
+            print("WEEKLY BREAKDOWN")
+
+            rem_dict = nutrient_breakdown(conn, username, 7)
+            print("REM DICT: ", rem_dict)
+            print()
+            # print_nutrient_breakdown(rem_dict)
