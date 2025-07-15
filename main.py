@@ -289,6 +289,13 @@ def one_time_setup(conn):
     if conditions == "Y" or conditions == "y":
         conditions = input("What are your conditions? ")
 
+    #get medications
+    medications = input("Are you on any regular medications? (eg. aspirin)  Enter y / n: ")
+    while open_ended_validation(conditions) == False:
+        medications = input("Medication input is invalid, please try again: ")
+    if medications == "Y" or medications == "y":
+        medications = input("What medications are you taking? ")
+
     #get restrictions
     restrictions = input("Do you have any dietary restrictions? (e.g. halal/ vegan/ kosher) Enter y / n: ")
     while open_ended_validation(restrictions) == False:
@@ -300,7 +307,7 @@ def one_time_setup(conn):
     nutri_goal = input("Enter your nutrition goal: ")
 
     #add user to USER database
-    db.add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal)
+    db.add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
     
     # add their daily requirments to daily_requirments database
     user_info = db.get_user_info(conn, username)
