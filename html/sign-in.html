@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>One Time Setup</title>
+</head>
+<body>
+    <h2>Welcome! Please complete your setup:</h2>
+    <form method="POST" action="{{ url_for('signin') }}">
+        <label>Username:</label><br/>
+        <input type="text" name="username" required><br/>
+
+        <label>Sex:</label><br/>
+        <select name="sex" required>
+        <option value="" disabled selected>Select your sex</option>
+        <option value="F">F</option>
+        <option value="M">M</option>
+        </select><br/>
+
+        <label>Age (number):</label><br/>
+        <input type="number" name="age" min="12" required><br/>
+
+        <label>Do you have allergies? (y/n):</label><br/>
+        <input type="text" name="allergies" maxlength="1" required><br/>
+        <div id="allergy-details" style="display:none;">
+            <label>If yes, what are you allergic to?</label><br/>
+            <input type="text" name="allergies_details"><br/>
+        </div>
+
+        <label>Do you have any conditions? (y/n):</label><br/>
+        <input type="text" name="conditions" maxlength="1" required><br/>
+        <div id="conditions-details" style="display:none;">
+            <label>If yes, please specify:</label><br/>
+            <input type="text" name="conditions_details"><br/>
+        </div>
+
+        <label>Are you on regular medications? (y/n):</label><br/>
+        <input type="text" name="medications" maxlength="1" required><br/>
+        <div id="medications-details" style="display:none;">
+            <label>If yes, please specify:</label><br/>
+            <input type="text" name="medications_details"><br/>
+        </div>
+
+        <label>Do you have any dietary restrictions? (y/n):</label><br/>
+        <input type="text" name="restrictions" maxlength="1" required><br/>
+        <div id="restrictions-details" style="display:none;">
+            <label>If yes, please specify:</label><br/>
+            <input type="text" name="restrictions_details"><br/>
+        </div>
+
+        <label>Nutrition goal:</label><br/>
+        <input type="text" name="nutri_goal" required><br/><br/>
+
+        <button type="submit">Submit</button>
+    </form>
+
+<script>
+// Show/hide details inputs based on y/n answers
+function toggleDetails(field) {
+    const yesNo = document.getElementsByName(field)[0].value.toLowerCase();
+    const details = document.getElementById(field + '-details');
+    if (yesNo === 'y') {
+        details.style.display = 'block';
+    } else {
+        details.style.display = 'none';
+        // clear input if hidden
+        details.querySelector('input').value = '';
+    }
+}
+
+['allergies', 'conditions', 'medications', 'restrictions'].forEach(field => {
+    const input = document.getElementsByName(field)[0];
+    input.addEventListener('input', () => toggleDetails(field));
+});
+</script>
+</body>
+</html>

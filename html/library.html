@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Welcome to our library</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 30px;
+    background: #f7f9fc;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #2c3e50;
+  }
+  .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 20px;
+  }
+  .box {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+    transition: transform 0.2s ease;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .box:hover {
+    transform: translateY(-5px);
+  }
+  .nutrient-title {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    text-transform: capitalize;
+    color: #2980b9;
+  }
+  .section-title {
+    margin-top: 15px;
+    font-weight: 600;
+    color: #1a5276;
+  }
+  .nutrient-desc, .deficiency-list, .food-list {
+    font-size: 0.9em;
+    color: #555;
+  }
+  ul {
+    padding-left: 20px;
+    margin: 5px 0;
+  }
+  li {
+    margin-bottom: 5px;
+  }
+  /* Micronutrients vs Macronutrients box styling */
+  #micro-macro {
+    grid-column: 1 / -1;
+    background: #e8f0fe;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgb(41 128 185 / 0.15);
+    color: #205295;
+  }
+  #micro-macro h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+  #micro-macro ul {
+    columns: 2;
+    padding-left: 20px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Welcome to our library</h1>
+<div class="container" id="nutrients-container"></div>
+
+<div class="container" id="micro-macro">
+  <h2>Micronutrients vs Macronutrients</h2>
+  <p>Understanding the two major nutrient groups:</p>
+  <ul>
+    <li><strong>Macronutrients:</strong> Nutrients needed in large amounts to provide energy and build body structures.</li>
+    •	Main types:
+	1.	Carbohydrates — the primary energy source; broken down into glucose.
+	2.	Proteins — build and repair tissues, enzymes, hormones.
+	3.	Fats — energy storage, cell structure, hormone production.
+	4.	Water (sometimes considered a macro because needed in large amounts, though it provides no energy).
+	5.	Fiber is sometimes grouped with carbs but it doesn’t provide energy directly; it supports digestion.
+    •	Role: Supply calories, support growth, maintain body tissues, and regulate body processes.
+    <li><strong>Micronutrients:</strong> Nutrients needed in smaller amounts but essential for proper body functions and disease prevention.</li>
+    •	Main types:
+	•	Vitamins (e.g., A, B-complex, C, D, E, K) — organic compounds necessary for numerous biochemical functions.
+	•	Minerals (e.g., iron, calcium, magnesium, zinc, potassium, sodium, phosphorus) — inorganic elements vital for bone formation, oxygen transport, nerve signaling, enzyme activity.
+	•	Energy: Micronutrients do NOT provide energy (calories).
+	•	Role:
+	•	Help convert macronutrients into energy.
+	•	Support immune system.
+	•	Maintain healthy bones and teeth.
+	•	Aid in blood clotting, oxygen transport, antioxidant functions, and hormone production.
+  </ul>
+  <ul>
+    <li><strong>Macronutrients include:</strong> Calories, protein, fat, carbs, fiber</li>
+    <li><strong>Micronutrients include:</strong> Vitamins A, B6, B12, C, D, E, K, iron, calcium, magnesium, zinc, potassium, sodium, phosphorus</li>
+  </ul>
+</div>
+
+<script>
+  const nutrients = {
+    calories: {
+      desc: [
+        "Provide the energy your body needs to perform all daily activities and bodily functions."
+      ],
+      deficiency: [
+        "Fatigue",
+        "Weight loss",
+        "Poor growth"
+      ],
+      foods: [
+        "Carbohydrates (rice, bread, pasta)",
+        "Fats (olive oil, nuts)",
+        "Proteins (meat, beans)"
+      ]
+    },
+    protein: {
+      desc: [
+        "Essential for building and repairing tissues, enzymes, and hormones."
+      ],
+      deficiency: [
+        "Muscle wasting",
+        "Weak immune system",
+        "Edema"
+      ],
+      foods: [
+        "Meat",
+        "Fish",
+        "Eggs",
+        "Legumes"
+      ]
+    },
+    fat: {
+      desc: [
+        "Supports cell growth, protects organs, and helps absorb certain vitamins."
+      ],
+      deficiency: [
+        "Dry skin",
+        "Poor vitamin absorption",
+        "Hormonal imbalances"
+      ],
+      foods: [
+        "Avocados",
+        "Nuts and seeds",
+        "Olive oil",
+        "Fatty fish"
+      ]
+    },
+    carbs: {
+      desc: [
+        "The body's main source of energy, especially for brain and muscles."
+      ],
+      deficiency: [
+        "Low energy",
+        "Fatigue",
+        "Ketosis"
+      ],
+      foods: [
+        "Bread",
+        "Rice",
+        "Pasta",
+        "Fruits",
+        "Vegetables"
+      ]
+    },
+    fiber: {
+      desc: [
+        "Aids digestion and helps maintain healthy blood sugar and cholesterol levels."
+      ],
+      deficiency: [
+        "Constipation",
+        "Digestive issues",
+        "Increased cholesterol"
+      ],
+      foods: [
+        "Whole grains",
+        "Fruits",
+        "Vegetables",
+        "Legumes"
+      ]
+    },
+    vitamin_a: {
+      desc: [
+        "Supports vision",
+        "Boosts immune function",
+        "Promotes skin health"
+      ],
+      deficiency: [
+        "Night blindness",
+        "Dry eyes",
+        "Increased infection risk"
+      ],
+      foods: [
+        "Carrots",
+        "Sweet potatoes",
+        "Spinach",
+        "Liver"
+      ]
+    },
+    vitamin_b12: {
+      desc: [
+        "Necessary for red blood cell formation",
+        "Supports neurological function"
+      ],
+      deficiency: [
+        "Anemia",
+        "Fatigue",
+        "Neurological issues"
+      ],
+      foods: [
+        "Meat",
+        "Fish",
+        "Eggs",
+        "Dairy products"
+      ]
+    },
+    vitamin_b6: {
+      desc: [
+        "Important for brain development",
+        "Maintains nervous and immune systems health"
+      ],
+      deficiency: [
+        "Anemia",
+        "Peripheral neuropathy",
+        "Depression"
+      ],
+      foods: [
+        "Poultry",
+        "Fish",
+        "Potatoes",
+        "Bananas"
+      ]
+    },
+    vitamin_c: {
+      desc: [
+        "Boosts immunity",
+        "Helps heal wounds",
+        "Acts as an antioxidant"
+      ],
+      deficiency: [
+        "Scurvy",
+        "Weak immunity",
+        "Slow wound healing"
+      ],
+      foods: [
+        "Citrus fruits",
+        "Strawberries",
+        "Broccoli",
+        "Bell peppers"
+      ]
+    },
+    vitamin_d: {
+      desc: [
+        "Promotes calcium absorption for strong bones",
+        "Supports immune health"
+      ],
+      deficiency: [
+        "Rickets",
+        "Osteomalacia",
+        "Weak bones"
+      ],
+      foods: [
+        "Fatty fish",
+        "Egg yolks",
+        "Fortified milk",
+        "Sunlight exposure"
+      ]
+    },
+    vitamin_e: {
+      desc: [
+        "Acts as an antioxidant",
+        "Protects cells from damage"
+      ],
+      deficiency: [
+        "Muscle weakness",
+        "Vision problems",
+        "Immune system issues"
+      ],
+      foods: [
+        "Nuts",
+        "Seeds",
+        "Spinach",
+        "Vegetable oils"
+      ]
+    },
+    vitamin_k: {
+      desc: [
+        "Essential for blood clotting",
+        "Supports bone metabolism"
+      ],
+      deficiency: [
+        "Excessive bleeding",
+        "Bruising"
+      ],
+      foods: [
+        "Leafy green vegetables",
+        "Broccoli",
+        "Brussels sprouts"
+      ]
+    },
+    iron: {
+      desc: [
+        "Crucial for making hemoglobin, which carries oxygen in the blood"
+      ],
+      deficiency: [
+        "Anemia",
+        "Fatigue",
+        "Weakness"
+      ],
+      foods: [
+        "Red meat",
+        "Beans",
+        "Spinach",
+        "Fortified cereals"
+      ]
+    },
+    calcium: {
+      desc: [
+        "Vital for building strong bones and teeth",
+        "Supports proper muscle function"
+      ],
+      deficiency: [
+        "Osteoporosis",
+        "Muscle cramps",
+        "Dental problems"
+      ],
+      foods: [
+        "Dairy products",
+        "Leafy greens",
+        "Fortified plant milks"
+      ]
+    },
+    magnesium: {
+      desc: [
+        "Involved in 300+ enzymatic reactions",
+        "Supports muscle and nerve function"
+      ],
+      deficiency: [
+        "Muscle cramps",
+        "Fatigue",
+        "Irregular heartbeat"
+      ],
+      foods: [
+        "Nuts",
+        "Seeds",
+        "Whole grains",
+        "Leafy greens"
+      ]
+    },
+    zinc: {
+      desc: [
+        "Supports immune function",
+        "Aids wound healing and DNA synthesis"
+      ],
+      deficiency: [
+        "Delayed wound healing",
+        "Hair loss",
+        "Impaired taste and smell"
+      ],
+      foods: [
+        "Meat",
+        "Shellfish",
+        "Legumes",
+        "Seeds"
+      ]
+    },
+    potassium: {
+      desc: [
+        "Regulates fluid balance",
+        "Helps nerve signals and muscle contractions"
+      ],
+      deficiency: [
+        "Muscle weakness",
+        "Irregular heartbeat",
+        "Fatigue"
+      ],
+      foods: [
+        "Bananas",
+        "Potatoes",
+        "Spinach",
+        "Beans"
+      ]
+    },
+    sodium: {
+      desc: [
+        "Maintains fluid balance",
+        "Supports muscle and nerve function"
+      ],
+      deficiency: [
+        "Hyponatremia",
+        "Muscle cramps",
+        "Confusion"
+      ],
+      foods: [
+        "Table salt",
+        "Processed foods",
+        "Seafood"
+      ]
+    },
+    phosphorus: {
+      desc: [
+        "Works with calcium to build strong bones and teeth",
+        "Helps convert food into energy"
+      ],
+      deficiency: [
+        "Weakness",
+        "Bone pain",
+        "Loss of appetite"
+      ],
+      foods: [
+        "Meat",
+        "Dairy products",
+        "Nuts",
+        "Whole grains"
+      ]
+    }
+  };
+
+  const sortedKeys = Object.keys(nutrients).sort();
+
+  const container = document.getElementById('nutrients-container');
+
+  sortedKeys.forEach(key => {
+    const box = document.createElement('div');
+    box.className = 'box';
+
+    const title = document.createElement('div');
+    title.className = 'nutrient-title';
+    title.textContent = key.replace(/_/g, ' ');
+
+    // Description section
+    const descTitle = document.createElement('div');
+    descTitle.className = 'section-title';
+    descTitle.textContent = "Why we need it:";
+    const desc = document.createElement('div');
+    desc.className = 'nutrient-desc';
+    const descList = document.createElement('ul');
+    nutrients[key].desc.forEach(point => {
+      const li = document.createElement('li');
+      li.textContent = point;
+      descList.appendChild(li);
+    });
+    desc.appendChild(descList);
+
+    // Deficiency section
+    const defTitle = document.createElement('div');
+    defTitle.className = 'section-title';
+    defTitle.textContent = "Deficiency can cause:";
+    const defList = document.createElement('div');
+    defList.className = 'deficiency-list';
+    const defUl = document.createElement('ul');
+    nutrients[key].deficiency.forEach(disease => {
+      const li = document.createElement('li');
+      li.textContent = disease;
+      defUl.appendChild(li);
+    });
+    defList.appendChild(defUl);
+
+    // Foods section
+    const foodTitle = document.createElement('div');
+    foodTitle.className = 'section-title';
+    foodTitle.textContent = "Foods rich in this nutrient:";
+    const foodList = document.createElement('div');
+    foodList.className = 'food-list';
+    const foodUl = document.createElement('ul');
+    nutrients[key].foods.forEach(food => {
+      const li = document.createElement('li');
+      li.textContent = food;
+      foodUl.appendChild(li);
+    });
+    foodList.appendChild(foodUl);
+
+    box.appendChild(title);
+    box.appendChild(descTitle);
+    box.appendChild(desc);
+    box.appendChild(defTitle);
+    box.appendChild(defList);
+    box.appendChild(foodTitle);
+    box.appendChild(foodList);
+
+    container.appendChild(box);
+  });
+</script>
+
+</body>
+</html>

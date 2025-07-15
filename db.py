@@ -16,6 +16,7 @@ def setup_db(conn):
             age INTEGER,
             allergies TEXT,
             conditions TEXT,
+            medications TEXT,
             restrictions TEXT,
             nutri_goal TEXT
         )
@@ -84,13 +85,13 @@ def user_in_db(conn, username):
     c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
     return c.fetchone() is not None
 
-def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal):
+def add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal):
     c = conn.cursor()
     try:
         c.execute("""
-            INSERT INTO user_info (username, sex, age, allergies, conditions, restrictions, nutri_goal)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (username, sex, int(age), allergies, str(conditions), restrictions, nutri_goal))
+            INSERT INTO user_info (username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (username, sex, int(age), allergies, str(conditions), medications, restrictions, nutri_goal))
         conn.commit()
     except Exception as e:
         print("Error adding user:", e)

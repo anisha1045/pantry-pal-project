@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Meal Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            gap: 2rem;
+            padding: 2rem;
+            background: #f9f9f9;
+        }
+        .left, .right {
+            flex: 1;
+        }
+        .progress-container {
+            margin-bottom: 1.5rem;
+        }
+        .progress-label {
+            margin-bottom: 0.3rem;
+            font-weight: bold;
+        }
+        .progress-bar {
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+        }
+        .progress-bar div {
+            height: 100%;
+            background: #6a9cf9;
+        }
+        .box {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .box img {
+            width: 100%;
+            max-width: 200px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .box button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #6a9cf9;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Popup styles */
+        #popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 10;
+            width: 90%;
+            max-width: 500px;
+        }
+        #popup input {
+            padding: 0.5rem;
+            margin: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        #popup button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #6a9cf9;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .food-item {
+            display: inline-flex;
+            align-items: center;
+            background: #eef;
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .food-item span {
+            margin-left: 0.5rem;
+            cursor: pointer;
+            color: #555;
+            font-weight: bold;
+        }
+        #submit-btn {
+            float: right;
+            margin-top: 1rem;
+        }
+
+        /* Dark overlay for popup */
+        #overlay {
+            position: fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background: rgba(0,0,0,0.3);
+            display:none;
+            z-index:5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="left">
+    <div class="progress-container">
+        <div class="progress-label">Calories</div>
+        <div class="progress-bar"><div style="width: 60%;"></div></div>
+    </div>
+    <div class="progress-container">
+        <div class="progress-label">Protein</div>
+        <div class="progress-bar"><div style="width: 40%;"></div></div>
+    </div>
+    <div class="progress-container">
+        <div class="progress-label">Carbs</div>
+        <div class="progress-bar"><div style="width: 70%;"></div></div>
+    </div>
+    <div class="progress-container">
+        <div class="progress-label">Fats</div>
+        <div class="progress-bar"><div style="width: 50%;"></div></div>
+    </div>
+</div>
+
+<div class="right">
+    <div class="box">
+        <h3>Log my meals with a picture</h3>
+        <img src="https://via.placeholder.com/200" alt="Upload a meal photo">
+        <button>Upload Picture</button>
+    </div>
+    <div class="box">
+        <h3>Log my meals manually</h3>
+        <button onclick="showPopup()">Enter Meal Details</button>
+    </div>
+</div>
+
+<div id="overlay"></div>
+
+<div id="popup">
+    <h3>Enter your meal</h3>
+    <div>
+        <input type="text" id="quantity" placeholder="Quantity (e.g. 2)">
+        <input type="text" id="food" placeholder="Food (e.g. eggs)">
+        <button onclick="addFood()">Enter</button>
+    </div>
+    <div id="food-list"></div>
+    <button id="submit-btn" onclick="submitMeals()">Submit</button>
+</div>
+
+<script>
+    const overlay = document.getElementById('overlay');
+    const popup = document.getElementById('popup');
+    const foodList = document.getElementById('food-list');
+    let meals = [];
+
+    function showPopup() {
+        overlay.style.display = 'block';
+        popup.style.display = 'block';
+    }
+
+    overlay.onclick = function() {
+        overlay.style.display = 'none';
+        popup.style.display = 'none';
+    }
+
+    function addFood() {
+        const qty = document.getElementById('quantity').value.trim();
+        const food = document.getElementById('food').value.trim();
+        if (!qty || !food) return;
+
+        const item = { qty, food };
+        meals.push(item);
+        renderFoods();
+        document.getElementById('quantity').value = '';
+        document.getElementById('food').value = '';
+    }
+
+    function renderFoods() {
+        foodList.innerHTML = '';
+        meals.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'food-item';
+            div.textContent = `${item.qty} ${item.food}`;
+            const x = document.createElement('span');
+            x.textContent = '×';
+            x.onclick = () => {
+                meals.splice(index, 1);
+                renderFoods();
+            };
+            div.appendChild(x);
+            foodList.appendChild(div);
+        });
+    }
+
+    function submitMeals() {
+        console.log("Submitted meals:", meals);
+        alert("Meals submitted!");
+        meals = [];
+        renderFoods();
+        overlay.style.display = 'none';
+        popup.style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
