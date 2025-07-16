@@ -25,6 +25,7 @@ stub = service_pb2_grpc.V2Stub(channel)
 metadata = (('authorization', 'Key ' + PAT),)
 
 userDataObject = resources_pb2.UserAppIDSet(user_id=USER_ID, app_id=APP_ID)
+print("HI")
 
 post_model_outputs_response = stub.PostModelOutputs(
     service_pb2.PostModelOutputsRequest(
@@ -42,7 +43,8 @@ post_model_outputs_response = stub.PostModelOutputs(
         ]
          
     ),
-    metadata=metadata
+    metadata=metadata,
+    timeout=10  # seconds
 )
 if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
     print(post_model_outputs_response.status)

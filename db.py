@@ -1,11 +1,9 @@
 import sqlite3
 
-
 def get_connection(test_mode=False):
     if test_mode:
         return sqlite3.connect(":memory:", check_same_thread=False)
     return sqlite3.connect("USER", check_same_thread=False)
-
 
 def setup_db(conn):
     c = conn.cursor()
@@ -81,12 +79,10 @@ def setup_db(conn):
     conn.commit()
     return conn
 
-
 def user_in_db(conn, username):
     c = conn.cursor()
     c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
     return c.fetchone() is not None
-
 
 def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal):
     c = conn.cursor()
@@ -99,13 +95,6 @@ def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, 
     except Exception as e:
         print("Error adding user:", e)
 
-
-def get_user_info(conn, username):
-    c = conn.cursor()
-    c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
-    return c.fetchall()
-
-
 def get_user_info(conn, username):
     c = conn.cursor()
     c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
@@ -114,8 +103,7 @@ def get_user_info(conn, username):
         columns = [col[0] for col in c.description]
         return dict(zip(columns, row))
     return None
-
-
+    
 def add_meal(conn, user_id, nutrients):
     c = conn.cursor()
     c.execute("""
@@ -129,19 +117,10 @@ def add_meal(conn, user_id, nutrients):
     """, (user_id, *nutrients))
     conn.commit()
 
-
-def get_meals_for_user(conn, user_id):
-    c = conn.cursor()
-    c.execute("SELECT * FROM meals WHERE user_id = ?", (user_id,))
-    return c.fetchall()
-
-
 def get_meals_for_today(conn, user_id, today):
     c = conn.cursor()
-    c.execute("SELECT * FROM meals WHERE user_id = ? AND date = ?",
-              (user_id, today,))
+    c.execute("SELECT * FROM meals WHERE user_id = ? AND date = ?", (user_id, today,))
     return c.fetchall()
-
 
 def save_daily_reqs(conn, user_id, requirements_dict):
     c = conn.cursor()
@@ -176,14 +155,7 @@ def save_daily_reqs(conn, user_id, requirements_dict):
     ))
     conn.commit()
 
-# returns a user's daily requirements given their username
-
-
 def get_daily_reqs(conn, user_id):
     c = conn.cursor()
     c.execute("SELECT * FROM daily_requirements WHERE user_id = ?", (user_id,))
     return c.fetchall()
-
-
-def close():
-    conn.close()
