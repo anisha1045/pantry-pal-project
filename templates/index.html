@@ -1,256 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="Pantry Pal - Your Personal Nutrition Assistant" />
-        <meta name="author" content="Pantry Pal Team" />
-        <title>Pantry Pal - Your Nutrition Helper</title>
-        <!-- Favicon-->
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-        <!-- Bootstrap icons-->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
-        <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    </head>
-    <body>
-        <!-- Responsive navbar-->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container px-5">
-                <a class="navbar-brand" href="#!">🥗 Pantry Pal</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/signup">Sign Up</a></li>
-                    </ul>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Pantry Pal</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container d-flex align-items-center">
+            <a class="navbar-brand" href="#!">🥗 Pantry Pal</a>
+            <a class="navbar-item" href="{{ url_for('log') }}">Log</a>
+            <a class="navbar-item" href="{{ url_for('planner') }}">Planner</a>
+            <a class="navbar-item" href="{{ url_for('calendar') }}">Calendar</a>
+            <a class="navbar-item" href="{{ url_for('library') }}">Library</a>
+            <!-- make this go to sign in if not signed in, otherwise go to profile -->
+            <a class="navbar-item d-flex align-items-center" href="{{ url_for('sign_in') }}">
+                <img src="profile.jpg" alt="Profile" style="
+                    display: inline-block;
+                    width: 40px;
+                    height: 40px;
+                    background-color: white;
+                    border-radius: 50%;
+                    margin-right: 15px;
+                "></span>
+                Sign In
+            </a>
+        </div>
+    </nav>
+
+
+    <!-- Header -->
+    <header class="py-5 bg-light border-bottom mb-4">
+        <div class="container text-center my-5">
+            <h1 class="fw-bolder">Welcome to Pantry Pal!</h1>
+            <p class="lead mb-0">Track your nutrients, optimize your meals, and stay healthy with smart recommendations.</p>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <div class="container">
+        <div class="row">
+            <!-- Dashboard -->
+            <div class="col-lg-8">
+                <!-- Nutrient progress -->
+                <div class="card mb-4">
+                    <div class="card-header">Today's Nutrients</div>
+                <div class="card-body">
+                    <p>Calories</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-primary" style="width: 50%;">50%</div>
+                    </div>
+                    <p>Protein</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-warning" style="width: 80%;">80%</div>
+                    </div>
+                    <p>Fat</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-danger" style="width: 60%;">60%</div>
+                    </div>
+                    <p>Carbs</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info" style="width: 70%;">70%</div>
+                    </div>
+                    <p>Fiber</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" style="width: 40%;">40%</div>
+                    </div>
+                    <p>Vitamin A</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-primary" style="width: 55%;">55%</div>
+                    </div>
+                    <p>Vitamin C</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" style="width: 65%;">65%</div>
+                    </div>
+                    <p>Vitamin D</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-warning" style="width: 35%;">35%</div>
+                    </div>
+                    <p>Vitamin E</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-danger" style="width: 45%;">45%</div>
+                    </div>
+                    <p>Vitamin K</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info" style="width: 50%;">50%</div>
+                    </div>
+                    <p>Vitamin B6</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" style="width: 60%;">60%</div>
+                    </div>
+                    <p>Vitamin B12</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-primary" style="width: 70%;">70%</div>
+                    </div>
+                    <p>Iron</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" style="width: 70%;">70%</div>
+                    </div>
+                    <p>Calcium</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-warning" style="width: 65%;">65%</div>
+                    </div>
+                    <p>Magnesium</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info" style="width: 45%;">45%</div>
+                    </div>
+                    <p>Zinc</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-danger" style="width: 50%;">50%</div>
+                    </div>
+                    <p>Potassium</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" style="width: 55%;">55%</div>
+                    </div>
+                    <p>Sodium</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-warning" style="width: 60%;">60%</div>
+                    </div>
+                    <p>Phosphorus</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info" style="width: 50%;">50%</div>
+                    </div>
+                    <p>Would you like a recipe to fulfill these requirements?</p>
+                    <a class="btn btn-primary" href="../html/planner">See Recipes</a>
+                </div>
                 </div>
             </div>
-        </nav>
-        <!-- Header-->
-        <header class="bg-dark py-5">
-            <div class="container px-5">
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-6">
-                        <div class="text-center my-5">
-                            <h1 class="display-5 fw-bolder text-white mb-2">Track your nutrition in a whole new way</h1>
-                            <p class="lead text-white-50 mb-4">Get personalized meal suggestions, track your daily nutrients, and meet your health goals with Pantry Pal!</p>
-                            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                                <a class="btn btn-primary btn-lg px-4 me-sm-3" href="/signup">Get Started</a>
-                                <a class="btn btn-outline-light btn-lg px-4" href="#features">Learn More</a>
-                            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Absorption tips -->
+                <div class="card mb-4">
+                    <div class="card-header">Today's Tip</div>
+                    <div class="card-body">
+                        Pair vitamin C-rich foods with iron sources for better absorption.
+                    </div>
+                </div>
+                <!-- Weekly summary -->
+                <div class="card mb-4">
+                    <div class="card-header">This Week</div>
+                    <div class="card-body">
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 85%;">Mon</div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-        <!-- Features section-->
-        <section class="py-5 border-bottom" id="features">
-            <div class="container px-5 my-5">
-                <div class="row gx-5">
-                    <div class="col-lg-4 mb-5 mb-lg-0">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-plus-circle"></i></div>
-                        <h2 class="h4 fw-bolder">Log Your Meals</h2>
-                        <p>Simply tell us what you ate and we'll track all the nutrition information automatically using smart food recognition.</p>
-                        <a class="text-decoration-none" href="/signup">
-                            Start Tracking
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 mb-5 mb-lg-0">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-lightbulb"></i></div>
-                        <h2 class="h4 fw-bolder">Smart Meal Suggestions</h2>
-                        <p>Get personalized meal recommendations based on your available ingredients and remaining nutritional needs.</p>
-                        <a class="text-decoration-none" href="/signup">
-                            Get Ideas
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-bar-chart"></i></div>
-                        <h2 class="h4 fw-bolder">Nutrition Tracking</h2>
-                        <p>See exactly what nutrients you still need today and get tips on how to absorb them better for optimal health.</p>
-                        <a class="text-decoration-none" href="/signup">
-                            View Progress
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Pricing section-->
-        <section class="bg-light py-5 border-bottom">
-            <div class="container px-5 my-5">
-                <div class="text-center mb-5">
-                    <h2 class="fw-bolder">Simple and Free</h2>
-                    <p class="lead mb-0">Start your nutrition journey today</p>
-                </div>
-                <div class="row gx-5 justify-content-center">
-                    <!-- Pricing card free-->
-                    <div class="col-lg-6 col-xl-4">
-                        <div class="card mb-5 mb-xl-0">
-                            <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold text-muted">Free Forever</div>
-                                <div class="mb-3">
-                                    <span class="display-4 fw-bold">$0</span>
-                                    <span class="text-muted">/ always</span>
-                                </div>
-                                <ul class="list-unstyled mb-4">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>Unlimited meal logging</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        AI-powered meal suggestions
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        19 nutrient tracking
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Personalized daily requirements
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Absorption optimization tips
-                                    </li>
-                                    <li class="mb-2 text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Premium meal plans
-                                    </li>
-                                    <li class="mb-2 text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Advanced analytics
-                                    </li>
-                                    <li class="text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Priority support
-                                    </li>
-                                </ul>
-                                <div class="d-grid"><a class="btn btn-primary" href="/signup">Start Free</a></div>
-                            </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 80%;">Tue</div>
                         </div>
-                    </div>
-                    <!-- Pricing card pro-->
-                    <div class="col-lg-6 col-xl-4">
-                        <div class="card mb-5 mb-xl-0">
-                            <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold">
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                    Coming Soon
-                                </div>
-                                <div class="mb-3">
-                                    <span class="display-4 fw-bold">$9</span>
-                                    <span class="text-muted">/ mo.</span>
-                                </div>
-                                <ul class="list-unstyled mb-4">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>Everything in Free</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Custom meal plans
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Advanced nutrient analytics
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Family accounts
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Shopping list generation
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Priority support
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Weekly progress reports
-                                    </li>
-                                    <li class="text-muted">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Export data
-                                    </li>
-                                </ul>
-                                <div class="d-grid"><a class="btn btn-outline-primary" href="/signup">Join Waitlist</a></div>
-                            </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 75%;">Wed</div>
+                        </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 85%;">Thu</div>
+                        </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 88%;">Fri</div>
+                        </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 92%;">Sat</div>
+                        </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 87%;">Sun</div>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
-        <!-- Testimonials section-->
-        <section class="py-5 border-bottom">
-            <div class="container px-5 my-5 px-5">
-                <div class="text-center mb-5">
-                    <h2 class="fw-bolder">What users are saying</h2>
-                    <p class="lead mb-0">Real feedback from our nutrition community</p>
-                </div>
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-6">
-                        <!-- Testimonial 1-->
-                        <div class="card mb-4">
-                            <div class="card-body p-4">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0"><i class="bi bi-chat-right-quote-fill text-primary fs-1"></i></div>
-                                    <div class="ms-4">
-                                        <p class="mb-1">I love how Pantry Pal tracks micronutrients! I never realized I was deficient in so many vitamins. The meal suggestions actually help me use what's in my fridge.</p>
-                                        <div class="small text-muted">- Sarah M., Health Enthusiast</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Testimonial 2-->
-                        <div class="card">
-                            <div class="card-body p-4">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0"><i class="bi bi-chat-right-quote-fill text-primary fs-1"></i></div>
-                                    <div class="ms-4">
-                                        <p class="mb-1">As someone with anemia, tracking my iron intake is crucial. Pantry Pal makes it so easy and even gives me tips on nutrient absorption. Game changer!</p>
-                                        <div class="small text-muted">- Marcus T., Fitness Coach</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Contact section-->
-        <section class="bg-light py-5">
-            <div class="container px-5 my-5 px-5">
-                <div class="text-center mb-5">
-                    <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-heart"></i></div>
-                    <h2 class="fw-bolder">Ready to start your health journey?</h2>
-                    <p class="lead mb-0">Join thousands improving their nutrition daily</p>
-                </div>
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-6">
-                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                            <a class="btn btn-primary btn-lg px-4" href="/signup">Create Free Account</a>
-                            <a class="btn btn-outline-primary btn-lg px-4" href="/login">Login</a>
-                        </div>
-                        <div class="text-center mt-4">
-                            <p class="text-muted mb-0">No credit card required • Free forever • Start in 30 seconds</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Footer-->
-        <footer class="py-5 bg-dark">
-            <div class="container px-5"><p class="m-0 text-center text-white">Copyright &copy; Pantry Pal 2024 - Your Personal Nutrition Assistant</p></div>
-        </footer>
-        <!-- Bootstrap core JS-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">&copy; Pantry Pal 2025</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/scripts.js"></script>
+</body>
 </html>

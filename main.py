@@ -7,13 +7,8 @@ import requests
 import json
 import db
 import ast
-<<<<<<< HEAD
-import auth
-import os
-from datetime import date
-=======
 from datetime import date, timedelta
->>>>>>> 7f5eca133acb404fc29ef48336133e44ff1c7aea
+
 
 NUTRIENTS = ["calories", "protein", "fat", "carbs", "fiber", "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
              "vitamin_b6", "vitamin_b12", "iron", "calcium", "magnesium", "zinc", "potassium", "sodium", "phosphorus"]
@@ -57,6 +52,7 @@ def meal_suggestion(conn):
         "What ingredients do you have? Enter as a string separated by a comma and a single space. eg: oats, bananas, apples: ")
     # get remaining nutrients from nutri_goals
     rem_nutrients = nutrient_breakdown(conn, username, recent_days=1)
+
     # ask chat for:
     # suggested meal, ideal meal, a sentence of feedback regarding groceries, and tips such as what to and not to consume to maximize absorption
     prompt = f"""
@@ -162,13 +158,7 @@ def print_nutrient_breakdown(rem_dict):
     print(divider)
     print(stars)
 
-<<<<<<< HEAD
-
 def nutrient_breakdown(conn, username):
-=======
-# returns a dict of keys (nutrients) and values (a tuple with consumed amount, required amount, and unit)
-def nutrient_breakdown(conn, username, recent_days=1):
->>>>>>> 7f5eca133acb404fc29ef48336133e44ff1c7aea
 
     user_id = get_user_id(conn, username)
 
@@ -193,7 +183,15 @@ def nutrient_breakdown(conn, username, recent_days=1):
         print("MEALS SO FAR", meals_so_far)
         # remove the first three (meal_id, user_id, and date)
         new_meals = [t[3:] for t in list(meals_so_far)]
+        print(day.isoformat())
+        meals_so_far = db.get_meals_for_day(conn, user_id, day.isoformat())
+        print("MEALS SO FAR", meals_so_far)
+        # remove the first three (meal_id, user_id, and date)
+        new_meals = [t[3:] for t in list(meals_so_far)]
 
+        for meal in new_meals:
+            for j in range(len(NUTRIENTS)):
+                rem_dict[NUTRIENTS[j]][0] += meal[j] if meal[j] is not None else 0
         for meal in new_meals:
             for j in range(len(NUTRIENTS)):
                 rem_dict[NUTRIENTS[j]][0] += meal[j] if meal[j] is not None else 0
@@ -232,6 +230,7 @@ def nutrition(eaten):
 # ask chat for a user's daily requirements - takes in a dict with the user's info
 def get_daily_requirement(user_info):
     print(user_info)
+    print(user_info)
     daily_requirements = [
         "calories", "protein", "fat", "carbs", "fiber",
         "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
@@ -269,17 +268,22 @@ def get_daily_requirement(user_info):
     print("Response from OpenAI API:")
     print(response.json())
 
-    returned_json = response.json()['choices'][0]['message']['content']
-<<<<<<< HEAD
+    print("Response from OpenAI API:")
+    print(response.json())
 
-=======
+    returned_json = response.json()['choices'][0]['message']['content']
 #     daily_requirements = parsed_content['daily_requirements']
 # adjustments = parsed_content['adjustments']
 
 # # Example usage
 # print("Daily Requirements:", daily_requirements)
 # print("Adjustments:", adjustments)
->>>>>>> 7f5eca133acb404fc29ef48336133e44ff1c7aea
+#     daily_requirements = parsed_content['daily_requirements']
+# adjustments = parsed_content['adjustments']
+
+# # Example usage
+# print("Daily Requirements:", daily_requirements)
+# print("Adjustments:", adjustments)
     return returned_json
 
 
@@ -327,21 +331,9 @@ def one_time_setup(conn, username_override=None):
     if conditions == "Y" or conditions == "y":
         conditions = input("What are your conditions? ")
 
-<<<<<<< HEAD
-    # get restrictions
-    restrictions = input(
-        "Do you have any dietary restrictions? (e.g. halal/ vegan/ kosher) Enter y / n: ")
-=======
-    #get medications
-    medications = input("Are you on any regular medications? (eg. aspirin)  Enter y / n: ")
-    while open_ended_validation(conditions) == False:
-        medications = input("Medication input is invalid, please try again: ")
-    if medications == "Y" or medications == "y":
-        medications = input("What medications are you taking? ")
 
     #get restrictions
     restrictions = input("Do you have any dietary restrictions? (e.g. halal/ vegan/ kosher) Enter y / n: ")
->>>>>>> 7f5eca133acb404fc29ef48336133e44ff1c7aea
     while open_ended_validation(restrictions) == False:
         restrictions = input(
             "Restrictions input is invalid, please try again: ")
@@ -351,16 +343,8 @@ def one_time_setup(conn, username_override=None):
     # get nutrition goals
     nutri_goal = input("Enter your nutrition goal: ")
 
-<<<<<<< HEAD
-    # add user to USER database
-    db.add_new_user(conn, username, sex, age, allergies,
-                    conditions, restrictions, nutri_goal)
-
-=======
-    #add user to USER database
     db.add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
     
->>>>>>> 7f5eca133acb404fc29ef48336133e44ff1c7aea
     # add their daily requirments to daily_requirments database
     user_info = db.get_user_info(conn, username)
     user_id = user_info.pop('user_id')
@@ -369,21 +353,17 @@ def one_time_setup(conn, username_override=None):
     reqs = get_daily_requirement(user_info)
 
     real_dict = ast.literal_eval(reqs)
-<<<<<<< HEAD
-
+    
     db.save_daily_reqs(conn, user_id, real_dict)
     return username
-=======
-    print(real_dict)
-    daily_reqs = real_dict['daily_requirements']
-    adjustments = real_dict['adjustments']
->>>>>>> 7f5eca133acb404fc29ef48336133e44ff1c7aea
 
-    print("Daily Requirements:", daily_reqs)
-    print("Adjustments:", adjustments)
 
-    db.save_daily_reqs(conn, user_id, daily_reqs)
-    return username, adjustments
+def get_logged_in_username():
+    if os.path.exists("logged_in_user.txt"):
+        with open("logged_in_user.txt", "r") as f:
+            return f.read().strip()
+    return None
+
 
 def log_meal(conn, username, user_ate):
     if (not user_ate):
@@ -409,9 +389,10 @@ def log_meal(conn, username, user_ate):
         meals = db.get_meals_for_user(conn, user_id)
         print("MEALS")
         print(meals)
+        meals = db.get_meals_for_user(conn, user_id)
+        print("MEALS")
+        print(meals)
     return user_ate
-    
-
 
 def say_goodbye():
     goodbye = r"""
@@ -487,16 +468,4 @@ while (True):
         elif option == "n":
             rem_dict = nutrient_breakdown(conn, username)
             print()
-<<<<<<< HEAD
             print_nutrient_breakdown(rem_dict)
-=======
-            print("REM DICT: ", rem_dict)
-            # print_nutrient_breakdown(rem_dict)
-
-            print("WEEKLY BREAKDOWN")
-
-            rem_dict = nutrient_breakdown(conn, username, 7)
-            print("REM DICT: ", rem_dict)
-            print()
-            # print_nutrient_breakdown(rem_dict)
->>>>>>> 7f5eca133acb404fc29ef48336133e44ff1c7aea
