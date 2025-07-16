@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Current Month Calendar</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 50px);
+    gap: 10px;
+    justify-content: start;
+  }
+  .day {
+    width: 50px;
+    height: 50px;
+    background: #4a90e2;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  .empty {
+    width: 50px;
+    height: 50px;
+  }
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 50px);
+    gap: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h2>Calendar for <span id="monthYear"></span></h2>
+
+<div class="weekdays">
+  <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+</div>
+
+<div class="calendar" id="calendar"></div>
+
+<script>
+  const calendarEl = document.getElementById('calendar');
+  const monthYearEl = document.getElementById('monthYear');
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-based
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Set header
+  monthYearEl.textContent = `${monthNames[month]} ${year}`;
+
+  // Get number of days in current month
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Get day of week of first day (0=Sun, 6=Sat)
+  const firstDayWeekday = new Date(year, month, 1).getDay();
+
+  // Add empty slots for days before first day
+  for (let i = 0; i < firstDayWeekday; i++) {
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'empty';
+    calendarEl.appendChild(emptyDiv);
+  }
+
+  // Add day circles
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day';
+    dayDiv.textContent = day;
+    calendarEl.appendChild(dayDiv);
+  }
+</script>
+
+</body>
+</html>
