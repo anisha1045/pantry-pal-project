@@ -16,6 +16,7 @@ def setup_db(conn):
             age INTEGER,
             allergies TEXT,
             conditions TEXT,
+            medications TEXT,
             restrictions TEXT,
             nutri_goal TEXT
         )
@@ -84,13 +85,13 @@ def user_in_db(conn, username):
     c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
     return c.fetchone() is not None
 
-def add_new_user(conn, username, sex, age, allergies, conditions, restrictions, nutri_goal):
+def add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal):
     c = conn.cursor()
     try:
         c.execute("""
-            INSERT INTO user_info (username, sex, age, allergies, conditions, restrictions, nutri_goal)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (username, sex, int(age), allergies, str(conditions), restrictions, nutri_goal))
+            INSERT INTO user_info (username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (username, sex, int(age), allergies, str(conditions), medications, restrictions, nutri_goal))
         conn.commit()
     except Exception as e:
         print("Error adding user:", e)
@@ -117,7 +118,12 @@ def add_meal(conn, user_id, nutrients):
     """, (user_id, *nutrients))
     conn.commit()
 
-def get_meals_for_today(conn, user_id, today):
+def get_meals_for_user(conn, user_id):
+    c = conn.cursor()
+    c.execute("SELECT * FROM meals WHERE user_id = ?", (user_id,))
+    return c.fetchall()
+
+def get_meals_for_day(conn, user_id, today):
     c = conn.cursor()
     c.execute("SELECT * FROM meals WHERE user_id = ? AND date = ?", (user_id, today,))
     return c.fetchall()
