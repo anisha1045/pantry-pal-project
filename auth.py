@@ -1,13 +1,10 @@
 # auth.py
-from flask import Flask, redirect, request, session
+from flask import Blueprint, redirect, request, session, url_for
 from requests_oauthlib import OAuth2Session
+from db import user_in_db, get_connection
 import os
-import threading
-import webbrowser
 
-# Flask setup
-app = Flask(__name__)
-app.secret_key = os.urandom(24)
+auth_bp = Blueprint('auth', __name__)
 
 # OAuth2 config
 client_id = "1157250652-tmr0ju9g9a3rb0vosg3r3v9ipi45hv86.apps.googleusercontent.com"
@@ -18,64 +15,37 @@ authorization_base_url = "https://accounts.google.com/o/oauth2/auth"
 token_url = "https://accounts.google.com/o/oauth2/token"
 userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
 
-# shared state
-user_email = None
-
-
-@app.route("/")
-def index():
-    return redirect("/login")
-
-
-@app.route("/login")
+@auth_bp.route("/google")
 def login():
-    google = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=[
-                           "profile", "email"])
-    auth_url, state = google.authorization_url(
-        authorization_base_url,
-        access_type="offline", prompt="select_account"
-    )
+    google = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=["profile", "email"])
+    auth_url, state = google.authorization_url(authorization_base_url, access_type="offline", prompt="select_account")
     session['oauth_state'] = state
     return redirect(auth_url)
 
-
-@app.route("/callback")
+@auth_bp.route("/callback")
 def callback():
-    global user_email
-    google = OAuth2Session(
-        client_id, redirect_uri=redirect_uri, state=session['oauth_state'])
-    token = google.fetch_token(
-        token_url, client_secret=client_secret, authorization_response=request.url)
-    google = OAuth2Session(client_id, token=token)
-    userinfo = google.get(userinfo_url).json()
+    try: 
+        google = OAuth2Session(
+            client_id, redirect_uri=redirect_uri, state=session['oauth_state'])
+        token = google.fetch_token(
+            token_url, client_secret=client_secret, authorization_response=request.url)
+        google = OAuth2Session(client_id, token=token)
+        userinfo = google.get(userinfo_url).json()
 
-    email = userinfo.get("email")
-    session['username'] = email
-    user_email = email
+        email = userinfo.get("email")
+        session['username'] = email   
 
-    # Save to file for terminal use
-    with open("logged_in_user.txt", "w") as f:
-        f.write(email)
+        # Check if user exists in DB
+        conn = get_connection(test_mode=False)
 
-    return f"<h2>Login successful!</h2><p>You can now return to the Pantry Pal terminal app.</p>"
+        if user_in_db(conn, email):
+            return redirect(url_for("dashboard"))
+        else:
+            return redirect(url_for("signup"))  # or one_time_setup
+    
+    except Exception as e:
+        return f"Google OAuth failed: {str(e)}", 500
+    
 
 
-def login_with_google():
-    def run_app():
-        app.run(port=5000, debug=False)
 
-    # Start Flask in background
-    thread = threading.Thread(target=run_app)
-    thread.daemon = True
-    thread.start()
-
-    # Open browser for user to sign in
-    webbrowser.open("http://localhost:5000", new=1)
-
-    # Wait until user_email is set via callback
-    import time
-    global user_email
-    while user_email is None:
-        time.sleep(1)
-
-    return user_email

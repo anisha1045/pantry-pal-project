@@ -1,5 +1,6 @@
-<<<<<<< HEAD
+
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from auth import auth_bp
 import db
 import json
 import ast
@@ -8,40 +9,23 @@ from datetime import date
 import os
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
-
-# Your existing constants
-NUTRIENTS = ["calories", "protein", "fat", "carbs", "fiber", "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
-             "vitamin_b6", "vitamin_b12", "iron", "calcium", "magnesium", "zinc", "potassium", "sodium", "phosphorus"]
-UNITS = ["kcal", "g", "g", "g", "g", "µg", "mg", "µg", "mg",
-         "µg", "mg", "µg", "mg", "mg", "mg", "mg", "mg", "mg", "mg"]
-ATTR_IDS = [208, 203, 204, 205, 291, 318, 401, 324, 323,
-            430, 415, 418, 303, 301, 304, 309, 306, 307, 305]
-
-# Initialize database
-con = db.get_connection(test_mode=False)
-conn = db.setup_db(con)
-
-# Your existing nutrition function
+app.secret_key = 'supersecretkey'
+app.register_blueprint(auth_bp, url_prefix="/auth")
 
 
-def nutrition(eaten):
-    data = {'query': eaten}
-=======
-from flask import Flask, request, render_template
-import requests
-import json
-import db 
-import ast
-from datetime import date, timedelta
+#config OAuth (Google sign in API)
+client_id = "1157250652-tmr0ju9g9a3rb0vosg3r3v9ipi45hv86.apps.googleusercontent.com"
+client_secret = "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"
+redirect_uri = "http://localhost:5000/callback"
 
+authorization_base_url = "https://accounts.google.com/o/oauth2/auth"
+token_url = "https://accounts.google.com/o/oauth2/token"
+userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
 
 NUTRIENTS = ["calories", "protein", "fat", "carbs", "fiber", "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
  "vitamin_b6", "vitamin_b12", "iron", "calcium", "magnesium", "zinc", "potassium", "sodium", "phosphorus"]
 UNITS = ["kcal", "g", "g", "g", "g", "µg", "mg", "µg", "mg", "µg", "mg", "µg", "mg", "mg", "mg", "mg", "mg", "mg", "mg"]
 ATTR_IDS = [208, 203, 204, 205, 291, 318, 401, 324, 323, 430, 415, 418, 303, 301, 304, 309, 306, 307, 305]
-
-app = Flask(__name__)
 
 con = db.get_connection(test_mode=False)
 conn = db.setup_db(con)
@@ -53,6 +37,10 @@ def home():
 @app.route('/log')
 def log():
     return render_template('log.html')
+
+@app.route('/old_dash')
+def old_dash():
+    return render_template('old_dash.html')
 
 @app.route('/planner')
 def planner():
@@ -109,45 +97,34 @@ def one_time_setup():
     user_id = user_info.pop('user_id')
     user_info.pop('username')
     user_info.pop('restrictions')
-    reqs = get_daily_requirement(user_info)
-
-    real_dict = ast.literal_eval(reqs)
-    print(real_dict)
-    daily_reqs = real_dict['daily_requirements']
-    adjustments = real_dict['adjustments']
+    # reqs = get_daily_requirement(user_info)
+    # TODO: PUT THIS BACK
+    daily_reqs = {'calories': 2300, 'protein': 34, 'fat': 44, 'carbs': 130, 'fiber': 15, 'vitamin_a': 600, 'vitamin_c': 45, 'vitamin_d': 600, 'vitamin_e': 11, 'vitamin_k': 55, 'vitamin_b6': 1.2, 'vitamin_b12': 2.4, 'iron': 8, 'calcium': 1300, 'magnesium': 240, 'zinc': 11, 'potassium': 4500, 'sodium': 1500, 'phosphorus': 1250}
+    adjustments = {}
+    # real_dict = ast.literal_eval(reqs)
+    # print(real_dict)
+    # daily_reqs = real_dict['daily_requirements']
+    # adjustments = real_dict['adjustments']
 
     print("Daily Requirements:", daily_reqs)
     print("Adjustments:", adjustments)
 
     db.save_daily_reqs(conn, user_id, daily_reqs)
-    return username, adjustments
-
-# returns a list of nutrient values in the order of NUTRIENTS for a given meal "eaten"
-@app.route('/log_meal', methods=['POST'])
-def log_meal():
-    data = request.get_json()
-    username = data.get('username')
-    meal = data.get('meal')
-    nutrients = nutrition(meal)
-    # get the user id from the user info db 
-    user_info = db.get_user_info(username)
-    user_id = user_info["user_id"]
-    # add this meal to the db with add_meal()
-    db.add_meal(user_id, nutrients)
+    session['username'] = username
+    # return username, adjustments
+    return jsonify({'success': True})
+    # return render_template('signup.html')
 
 # get nutritional info for a given meal
 def nutrition(eaten):
     data = {
         'query' : eaten
     }
->>>>>>> main
     header = {
         'Content-Type': 'application/json',
         'x-app-id': '6b8a82ea',
         'x-app-key': 'c585212505ab717d1d2a11b2afb9da84'
     }
-<<<<<<< HEAD
-
     url = "https://trackapi.nutritionix.com/v2/natural/nutrients"
     response = requests.post(url, headers=header, data=json.dumps(data))
 
@@ -159,52 +136,23 @@ def nutrition(eaten):
     else:
         raise Exception("Failed to get nutrition data")
 
-# Your existing daily requirement function
-
-
-def get_daily_requirement(user_info):
-=======
-    
-    url = "https://trackapi.nutritionix.com/v2/natural/nutrients"
-    response = requests.post(url, headers=header, data=json.dumps(data))
-
-    full_nutrients =  response.json()['foods'][0]['full_nutrients']
-    data_dict = {item['attr_id']: item['value'] for item in full_nutrients}
-
-    nutrient_vals = [data_dict.get(attr_id, None) for attr_id in ATTR_IDS]
-    return nutrient_vals
-
 
 # ask chat for a user's daily requirements - takes in a dict with the user's info 
 def get_daily_requirement(user_info):
     print(user_info)
->>>>>>> main
     daily_requirements = [
         "calories", "protein", "fat", "carbs", "fiber",
         "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
         "vitamin_b6", "vitamin_b12", "iron", "calcium", "magnesium",
         "zinc", "potassium", "sodium", "phosphorus"
     ]
-<<<<<<< HEAD
-
     url = "https://api.openai.com/v1/chat/completions"
     api_key = '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'
-
-=======
-    url = "https://api.openai.com/v1/chat/completions"
-    api_key = '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'
->>>>>>> main
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
-<<<<<<< HEAD
 
-    data = {
-        "model": "gpt-3.5-turbo",
-        "messages": [
-            {"role": "system", "content": f"Generate a dictionary of ints for daily requirements of the following: {daily_requirements} based on this user: {user_info}. Do not include units."}
-=======
     data = {
         "model": "gpt-3.5-turbo",
         "messages": [
@@ -223,37 +171,19 @@ def get_daily_requirement(user_info):
             }}
             }}
             """}
->>>>>>> main
+
         ]
     }
 
     response = requests.post(url, headers=headers, json=data)
-<<<<<<< HEAD
     returned_json = response.json()['choices'][0]['message']['content']
-    return returned_json
-
-# Meal suggestion function for web
-
-
-def meal_suggestion_web(ingredients, rem_nutrients):
-=======
-    print("Response from OpenAI API:")
-    print(response.json())
-
-    returned_json = response.json()['choices'][0]['message']['content']
-#     daily_requirements = parsed_content['daily_requirements']
-# adjustments = parsed_content['adjustments']
-
-# # Example usage
-# print("Daily Requirements:", daily_requirements)
-# print("Adjustments:", adjustments)
     return returned_json
 
 
 @app.route('/nutrient_breakdown/<username>/<recent_days>')
-def nutrient_breakdown(conn, username, recent_days=1):
+def nutrient_breakdown(username, recent_days=1):
 
-    user_id = get_user_id(conn, username)
+    user_id = get_user_id(username)
 
     # get the user's daily requirements
     daily_req = db.get_daily_reqs(conn, user_id)[0]
@@ -288,15 +218,15 @@ def get_user_id(conn, username):
     user_id = user_info['user_id']
     return user_id
 
-@app.route('/get_meal_plan/<username>')
+
+@app.route('/api/meal_suggestion', methods=['POST'])
 def get_meal_plan(conn, username):
     # ask user for things they have in their fridge
     ingredients = input("What ingredients do you have? Enter as a string separated by a comma and a single space. eg: oats, bananas, apples: ")
     # get remaining nutrients from nutri_goals
-    rem_nutrients = nutrient_breakdown(conn, username, recent_days=1)
+    rem_nutrients = nutrient_breakdown(username, recent_days=1)
     # ask chat for:
     # suggested meal, ideal meal, a sentence of feedback regarding groceries, and tips such as what to and not to consume to maximize absorption
->>>>>>> main
     prompt = f"""
         Given these inputs:
         - Ingredients: {ingredients}
@@ -306,11 +236,7 @@ def get_meal_plan(conn, username):
         1. a suggested meal given the ingredients and nutritional requirements
         2. an ideal meal for the nutritional requirements, ignoring ingredient constraints
         3. a short evaluation of the ingredients in meeting the nutritional needs
-<<<<<<< HEAD
         4. 2 tips to achieve the nutritional requirements including how to achieve maximum 
-=======
-        4. 2 tips to achieve the nutritional requirements including how to acheive maximum 
->>>>>>> main
             absorption of needed nutrients 
 
         Return the response in the following JSON format:
@@ -325,32 +251,24 @@ def get_meal_plan(conn, username):
 
     url = "https://api.openai.com/v1/chat/completions"
     api_key = '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'
-<<<<<<< HEAD
 
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
 
-=======
-    
->>>>>>> main
     data = {
         "model": "gpt-3.5-turbo",
         "messages": [
             {"role": "system", "content": prompt}
         ]
     }
-<<<<<<< HEAD
 
     response = requests.post(url, headers=headers, json=data)
     response_json = response.json()
     content = response_json['choices'][0]['message']['content']
     content_dict = json.loads(content)
     return content_dict
-
-# Simple validation functions from your original code
-
 
 def validate_name(name):
     if name.isdigit():
@@ -362,7 +280,6 @@ def validate_name(name):
 
 def sex_validation(sex):
     return sex.upper() in ["M", "F"]
-
 
 def age_validation(age):
     return age.isdigit()
@@ -405,6 +322,7 @@ def signup():
                             age,
                             data.get('allergies', ''),
                             data.get('conditions', ''),
+                            data.get('medications', ''),
                             data.get('restrictions', ''),
                             data.get('nutri_goal', ''))
 
@@ -488,43 +406,8 @@ def log_meal():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
-@app.route('/api/meal_suggestion', methods=['POST'])
-def get_meal_suggestion():
-    if 'username' not in session:
-        return jsonify({'success': False, 'error': 'Not logged in'}), 401
-
-    data = request.get_json()
-    ingredients = data.get('ingredients', '').strip()
-
-    try:
-        username = session['username']
-        user_id = db.get_user_info(conn, username)['user_id']
-
-        # Get remaining nutrients
-        daily_req = db.get_daily_reqs(conn, user_id)[0]
-        new_daily_req = daily_req[2:]
-
-        today = date.today().isoformat()
-        meals_so_far = db.get_meals_for_today(conn, user_id, today)
-        new_meals = [t[3:] for t in list(meals_so_far)]
-
-        remaining = list(new_daily_req)
-        for meal in new_meals:
-            for i in range(len(remaining)):
-                if meal[i] is not None:
-                    remaining[i] = remaining[i] - int(meal[i])
-
-        rem_dict = {NUTRIENTS[i]: remaining[i] for i in range(len(NUTRIENTS))}
-
-        suggestion = meal_suggestion_web(ingredients, rem_dict)
-        return jsonify({'success': True, **suggestion})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
 @app.route('/api/nutrient_breakdown')
-def get_nutrient_breakdown():
+def get_nutrient_breakdown(username, recent_days=1):
     if 'username' not in session:
         return jsonify({'success': False, 'error': 'Not logged in'}), 401
 
@@ -558,38 +441,89 @@ def get_nutrient_breakdown():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@app.route('/identify_food', methods=['POST'])
+def identify_food():
+    print("identifying food")
+    if 'mealImage' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['mealImage']
+    file_bytes = file.read()
+    # Your PAT (Personal Access Token) can be found in the Account's Security section
+    PAT = '1e5f77d736174440b16593d07b98a512'
+    # Specify the correct user_id/app_id pairings
+    # Since you're making inferences outside your app's scope
+    USER_ID = 'clarifai'
+    APP_ID = 'main'
+    # Change these to whatever model and image URL you want to use
+    MODEL_ID = 'food-item-recognition'
+    MODEL_VERSION_ID = '1d5fd481e0cf4826aa72ec3ff049e044'
+    IMAGE_URL = 'https://samples.clarifai.com/food.jpg'
+
+    from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+    from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
+    from clarifai_grpc.grpc.api.status import status_code_pb2
+
+    channel = ClarifaiChannel.get_grpc_channel()
+    stub = service_pb2_grpc.V2Stub(channel)
+
+    metadata = (('authorization', 'Key ' + PAT),)
+
+    userDataObject = resources_pb2.UserAppIDSet(user_id=USER_ID, app_id=APP_ID)
+
+    post_model_outputs_response = stub.PostModelOutputs(
+        service_pb2.PostModelOutputsRequest(
+            user_app_id=userDataObject,  # The userDataObject is created in the overview and is required when using a PAT
+            model_id=MODEL_ID,
+            version_id=MODEL_VERSION_ID,  # This is optional. Defaults to the latest model version
+            inputs=[
+                resources_pb2.Input(
+                    data=resources_pb2.Data(
+                        image=resources_pb2.Image(
+                            base64=file_bytes
+                        )
+                    )
+                )
+            ]
+            
+        ),
+        metadata=metadata,
+        timeout=10  # seconds
+    )
+    if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
+        print(post_model_outputs_response.status)
+        raise Exception("Post model outputs failed, status: " + post_model_outputs_response.status.description)
+
+    # Since we have one input, one output will exist here
+    output = post_model_outputs_response.outputs[0]
+
+    print("Predicted concepts:")
+    index = 5
+    for concept in output.data.concepts:
+        if (index == 0):
+            break
+        print("%s %.2f" % (concept.name, concept.value))
+        index -= 1
+
+    filtered_concepts = [
+    {"name": concept.name, "value": concept.value}
+    for concept in output.data.concepts
+    if concept.value > 0.5
+]
+
+    return jsonify(predicted_concepts=filtered_concepts)
+
+        
+
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
+#debugging purposes
+@app.route('/debug-routes')
+def debug_routes():
+    return "<br>".join([str(rule) for rule in app.url_map.iter_rules()])
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
-=======
     
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    
-    response = requests.post(url, headers=headers, json=data)
-    response_json = response.json()
-
-    content = response_json['choices'][0]['message']['content']
-    content_dict = json.loads(content)
-
-    # parse whatever chat gave us
-    suggested_meal = content_dict["suggested_meal"]
-    ideal_meal = content_dict["ideal_meal"]
-    evaluation = content_dict["evaluation"]
-    tips = content_dict["tips"]
-
-    #print suggested meal and other output to the user
-    print_meal_response(suggested_meal, ideal_meal, evaluation, tips)
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
->>>>>>> main

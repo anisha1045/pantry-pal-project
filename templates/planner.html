@@ -46,37 +46,54 @@
             border-radius: 10px;
             margin-bottom: 1rem;
         }
-        .box button {
+        .btn-group input[type="radio"] {
+            display: none;
+        }
+        .btn-group label {
             padding: 0.5rem 1rem;
-            border: none;
+            border: 1px solid #6a9cf9;
+            background: white;
+            color: #6a9cf9;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 0 0.2rem;
+        }
+        .btn-group input[type="radio"]:checked + label {
             background: #6a9cf9;
             color: white;
-            border-radius: 8px;
-            cursor: pointer;
         }
 
-        /* Popup styles */
-        #popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+        /* Meal input sections */
+        #imageInputSection, #textInputSection {
             display: none;
-            z-index: 10;
-            width: 90%;
-            max-width: 500px;
+            margin-top: 1rem;
         }
-        #popup input {
+        #imageInputSection input {
+            width: 100%;
             padding: 0.5rem;
-            margin: 0.5rem;
+            margin-top: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        #imagePreview img {
+            margin-top: 1rem;
+            max-width: 200px;
+            border-radius: 10px;
+        }
+
+        #foodInputs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        #foodInputs input {
+            padding: 0.5rem;
             border: 1px solid #ccc;
             border-radius: 8px;
         }
-        #popup button {
+        #foodInputs button {
             padding: 0.5rem 1rem;
             border: none;
             background: #6a9cf9;
@@ -100,18 +117,13 @@
             font-weight: bold;
         }
         #submit-btn {
-            float: right;
-            margin-top: 1rem;
-        }
-
-        /* Dark overlay for popup */
-        #overlay {
-            position: fixed;
-            top:0; left:0;
-            width:100%; height:100%;
-            background: rgba(0,0,0,0.3);
-            display:none;
-            z-index:5;
+            margin-top: 1.5rem;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            background: #6a9cf9;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -138,58 +150,67 @@
 
 <div class="right">
     <div class="box">
-        <h3>Log my meals with a picture</h3>
-        <img src="https://via.placeholder.com/200" alt="Upload a meal photo">
-        <button>Upload Picture</button>
-    </div>
-    <div class="box">
-        <h3>Log my meals manually</h3>
-        <button onclick="showPopup()">Enter Meal Details</button>
-    </div>
-</div>
+        <h3>Log Your Meal</h3>
+        <div class="btn-group" role="group">
+            <input type="radio" id="textInput" name="inputMethod" checked>
+            <label for="textInput">Type Meal</label>
+            <input type="radio" id="imageInput" name="inputMethod">
+            <label for="imageInput">Upload Photo</label>
+        </div>
 
-<div id="overlay"></div>
+        <div id="textInputSection">
+            <div id="foodInputs">
+                <input type="text" id="quantity" placeholder="Quantity (e.g. 2)">
+                <input type="text" id="food" placeholder="Food (e.g. eggs)">
+                <button onclick="addFood()">Enter</button>
+            </div>
+            <div id="food-list"></div>
+        </div>
 
-<div id="popup">
-    <h3>Enter your meal</h3>
-    <div>
-        <input type="text" id="quantity" placeholder="Quantity (e.g. 2)">
-        <input type="text" id="food" placeholder="Food (e.g. eggs)">
-        <button onclick="addFood()">Enter</button>
+        <div id="imageInputSection">
+            <input type="file" id="mealImage" accept="image/*" capture="environment" onchange="previewImage(event)">
+            <div id="imagePreview" style="display:none;">
+                <img id="previewImg">
+            </div>
+            <button style="margin-top: 1rem;" onclick="uploadMeal()">Upload Meal</button>
+        </div>
+
+        <button id="submit-btn" onclick="submitMeals()">Submit</button>
     </div>
-    <div id="food-list"></div>
-    <button id="submit-btn" onclick="submitMeals()">Submit</button>
 </div>
 
 <script>
-    const overlay = document.getElementById('overlay');
-    const popup = document.getElementById('popup');
-    const foodList = document.getElementById('food-list');
+    const textInput = document.getElementById('textInput');
+    const imageInput = document.getElementById('imageInput');
+    const textInputSection = document.getElementById('textInputSection');
+    const imageInputSection = document.getElementById('imageInputSection');
+
+    function updateInputDisplay() {
+        if (textInput.checked) {
+            textInputSection.style.display = 'block';
+            imageInputSection.style.display = 'none';
+        } else {
+            textInputSection.style.display = 'none';
+            imageInputSection.style.display = 'block';
+        }
+    }
+    textInput.onchange = updateInputDisplay;
+    imageInput.onchange = updateInputDisplay;
+    updateInputDisplay();
+
     let meals = [];
-
-    function showPopup() {
-        overlay.style.display = 'block';
-        popup.style.display = 'block';
-    }
-
-    overlay.onclick = function() {
-        overlay.style.display = 'none';
-        popup.style.display = 'none';
-    }
-
     function addFood() {
         const qty = document.getElementById('quantity').value.trim();
         const food = document.getElementById('food').value.trim();
         if (!qty || !food) return;
-
-        const item = { qty, food };
-        meals.push(item);
+        meals.push({ qty, food });
         renderFoods();
         document.getElementById('quantity').value = '';
         document.getElementById('food').value = '';
     }
 
     function renderFoods() {
+        const foodList = document.getElementById('food-list');
         foodList.innerHTML = '';
         meals.forEach((item, index) => {
             const div = document.createElement('div');
@@ -207,12 +228,58 @@
     }
 
     function submitMeals() {
-        console.log("Submitted meals:", meals);
-        alert("Meals submitted!");
-        meals = [];
-        renderFoods();
-        overlay.style.display = 'none';
-        popup.style.display = 'none';
+        if (textInput.checked) {
+            console.log("Submitted typed meals:", meals);
+            alert("Typed meals submitted!");
+            meals = [];
+            renderFoods();
+        } else {
+            console.log("Submitted photo meal.");
+            alert("Meal photo submitted!");
+        }
+    }
+
+    async function identifyImage(file) {
+        try {
+            const formData = new FormData();
+            formData.append('mealImage', file);
+
+            const response = await fetch('/identify_food', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                console.log("Upload succeeded");
+                const data = await response.json();
+                return data;  // or do something with response
+            } else {
+                throw new Error("Upload failed");
+            }
+        } catch (err) {
+            console.error("Save cancelled or failed:", err);
+        }
+    }
+
+    function previewImage(event) {
+        const imgPreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        previewImg.src = URL.createObjectURL(event.target.files[0]);
+        imgPreview.style.display = 'block';
+        const file = document.getElementById('mealImage').files[0];
+        identifyImage(file)
+        .then(() => {
+            console.log("Save succeeded!");
+            alert("Image saved successfully!");
+        })
+        .catch(err => {
+            console.error("Save failed:", err);
+            alert("Failed to save image.");
+        });
+    }
+
+    function uploadMeal() {
+        alert("Meal image uploaded (mock).");
     }
 </script>
 
