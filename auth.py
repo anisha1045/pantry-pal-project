@@ -21,13 +21,16 @@ userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
 # shared state
 user_email = None
 
+
 @app.route("/")
 def index():
     return redirect("/login")
 
+
 @app.route("/login")
 def login():
-    google = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=["profile", "email"])
+    google = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=[
+                           "profile", "email"])
     auth_url, state = google.authorization_url(
         authorization_base_url,
         access_type="offline", prompt="select_account"
@@ -35,11 +38,14 @@ def login():
     session['oauth_state'] = state
     return redirect(auth_url)
 
+
 @app.route("/callback")
 def callback():
     global user_email
-    google = OAuth2Session(client_id, redirect_uri=redirect_uri, state=session['oauth_state'])
-    token = google.fetch_token(token_url, client_secret=client_secret, authorization_response=request.url)
+    google = OAuth2Session(
+        client_id, redirect_uri=redirect_uri, state=session['oauth_state'])
+    token = google.fetch_token(
+        token_url, client_secret=client_secret, authorization_response=request.url)
     google = OAuth2Session(client_id, token=token)
     userinfo = google.get(userinfo_url).json()
 
@@ -52,6 +58,7 @@ def callback():
         f.write(email)
 
     return f"<h2>Login successful!</h2><p>You can now return to the Pantry Pal terminal app.</p>"
+
 
 def login_with_google():
     def run_app():
