@@ -2,8 +2,8 @@ import sqlite3
 
 def get_connection(test_mode=False):
     if test_mode:
-        return sqlite3.connect(":memory:")
-    return sqlite3.connect("USER")
+        return sqlite3.connect(":memory:", check_same_thread=False)
+    return sqlite3.connect("USER", check_same_thread=False)
 
 def setup_db(conn):
     c = conn.cursor()
@@ -96,13 +96,6 @@ def add_new_user(conn, username, sex, age, allergies, conditions, medications, r
     except Exception as e:
         print("Error adding user:", e)
 
-
-def get_user_info(conn, username):
-    c = conn.cursor()
-    c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
-    return c.fetchall()
-
-
 def get_user_info(conn, username):
     c = conn.cursor()
     c.execute("SELECT * FROM user_info WHERE username = ?", (username,))
@@ -168,12 +161,7 @@ def save_daily_reqs(conn, user_id, requirements_dict):
     ))
     conn.commit()
 
-# returns a user's daily requirements given their username
 def get_daily_reqs(conn, user_id):
     c = conn.cursor()
     c.execute("SELECT * FROM daily_requirements WHERE user_id = ?", (user_id,))
     return c.fetchall()
-
-def close():
-    conn.close()
-
