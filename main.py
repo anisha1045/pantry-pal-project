@@ -253,18 +253,23 @@ def get_daily_requirement(user_info):
 # print("Adjustments:", adjustments)
     return returned_json
     
-def one_time_setup(conn):
+def one_time_setup(conn, username_override=None):
     print("Yay, we're so glad you're here!")
-    #get username
-    username = input("To start, please enter a username: ")
-    user_in_db = db.user_in_db(conn, username)
-    while ((not validate_name(username)) or (user_in_db)):
-        if (user_in_db):
-            username = input("That username was already taken. Please try again: ")
-            user_in_db = db.user_in_db(conn, username)
-        else:
-            username = input("Username input invalid. Please try again: ")
-        
+    
+    if username_override:
+        username = username_override
+    else:
+        username = input("To start, please enter a username: ")
+        user_in_db = db.user_in_db(conn, username)
+        while ((not validate_name(username)) or (user_in_db)):
+            if (user_in_db):
+                username = input("That username was already taken. Please try again: ")
+                user_in_db = db.user_in_db(conn, username)
+            else:
+                username = input("Username input invalid. Please try again: ")
+
+    print(f"Welcome, {username}! Let's get you set up with your profile.")
+
     #get sex
     sex = input("Enter your sex (F / M): ") 
     while sex_validation(sex) == False:
@@ -376,21 +381,34 @@ print(hearts_banner)
 con = db.get_connection(test_mode=False)
 conn = db.setup_db(con)
 
-#connect user to account / their saved profile
-while (True):
-    first_time = input("\nIs this your first time with us? Enter y / n: ")
-    while (first_time != 'y' and first_time != "Y" and first_time != "n" and first_time != "N"):
-        first_time = input("Invalid input, please try again. Is this your first time with us? Enter y / n: ")
-    if (first_time == "y" or first_time == "Y"):
-        username = one_time_setup(conn)
-        break
-    else: 
-        username = input("Please enter your username: ")
-        if (not db.user_in_db(conn, username)):
-            print("{username} was not found. Please try again.")
-        else:
-            print(f"Welcome back! It's great to see you, {username}!")
+# Attempt to use saved Google login first
+username = get_logged_in_username()
+if username:
+    print(f"🌟 Welcome back, {username} (Google Sign-In)! 🌟")
+else:
+    while True:
+        use_google = input("Would you like to log in with Google? (y / n): ").lower()
+        if use_google == "y":
+            username = auth.login_with_google()
             break
+        elif use_google == "n":
+            first_time = input("\nIs this your first time with us? Enter y / n: ")
+            while first_time not in ["y", "n"]:
+                first_time = input("Invalid input. Is this your first time with us? Enter y / n: ")
+
+            if first_time == "y":
+                username = one_time_setup(conn)
+            else:
+                username = input("Please enter your username: ")
+                if not db.user_in_db(conn, username):
+                    print(f"{username} was not found. Please try again.")
+                    continue
+                else:
+                    print(f"Welcome back! It's great to see you, {username}!")
+            break
+        else:
+            print("Invalid input. Please try again.")
+
 user_ate = False
 while (True):
     option = input(f"\nWould you like a meal suggestion (m), or a breakdown of your remaining nutritional requirements today (n), or to quit (q)? ")

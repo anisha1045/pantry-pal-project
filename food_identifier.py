@@ -15,10 +15,6 @@ MODEL_ID = 'food-item-recognition'
 MODEL_VERSION_ID = '1d5fd481e0cf4826aa72ec3ff049e044'
 IMAGE_URL = 'https://samples.clarifai.com/food.jpg'
 
-############################################################################
-# YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
-############################################################################
-
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
 from clarifai_grpc.grpc.api.status import status_code_pb2
