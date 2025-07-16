@@ -1,3 +1,4 @@
+app.py
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from auth import auth_bp
@@ -5,7 +6,7 @@ import db
 import json
 import ast
 import requests
-from datetime import date
+from datetime import date, timedelta
 import os
 
 app = Flask(__name__)
@@ -75,45 +76,69 @@ def check_user(username):
     user_exists = db.user_in_db(conn, username)
     return {'exists': user_exists}
 
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        data = request.get_json()
 
-# @app.route('/one_time_setup', methods=['POST'])
-# def one_time_setup():
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
 
-#     data = request.get_json()
-#     username = data.get('username')
-#     sex = data.get('sex')
-#     age = data.get('age')
-#     allergies = data.get('allergies')
-#     conditions = data.get('conditions')
-#     medications = data.get('medications')
-#     restrictions = data.get('restrictions')
-#     nutri_goal = data.get('nutri_goal')
+        if not validate_name(username):
+            return jsonify({'success': False, 'error': 'Invalid username'})
 
-#     #add user to USER database
-#     db.add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
+        if db.user_in_db(conn, username):
+            return jsonify({'success': False, 'error': 'Username already exists'})
+
+        # Add user with empty/default values for profile fields
+        db.add_new_user(conn, username, '', '', '', '', '', '', '')
+
+        # Save session
+        session['username'] = username
+        return jsonify({'success': True, 'redirect': '/one_time_setup'})
+
+    return render_template('signup.html')
+
+
+@app.route('/one_time_setup', methods=['POST'])
+def one_time_setup():
+
+    data = request.get_json()
+    username = data.get('username')
+    sex = data.get('sex')
+    age = data.get('age')
+    allergies = data.get('allergies')
+    conditions = data.get('conditions')
+    medications = data.get('medications')
+    restrictions = data.get('restrictions')
+    nutri_goal = data.get('nutri_goal')
+
+    #add user to USER database
+    db.add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
     
-#     # add their daily requirments to daily_requirments database
-#     user_info = db.get_user_info(conn, username)
-#     user_id = user_info.pop('user_id')
-#     user_info.pop('username')
-#     user_info.pop('restrictions')
-#     # reqs = get_daily_requirement(user_info)
-#     # TODO: PUT THIS BACK
-#     daily_reqs = {'calories': 2300, 'protein': 34, 'fat': 44, 'carbs': 130, 'fiber': 15, 'vitamin_a': 600, 'vitamin_c': 45, 'vitamin_d': 600, 'vitamin_e': 11, 'vitamin_k': 55, 'vitamin_b6': 1.2, 'vitamin_b12': 2.4, 'iron': 8, 'calcium': 1300, 'magnesium': 240, 'zinc': 11, 'potassium': 4500, 'sodium': 1500, 'phosphorus': 1250}
-#     adjustments = {}
-#     # real_dict = ast.literal_eval(reqs)
-#     # print(real_dict)
-#     # daily_reqs = real_dict['daily_requirements']
-#     # adjustments = real_dict['adjustments']
+    # add their daily requirments to daily_requirments database
+    user_info = db.get_user_info(conn, username)
+    user_id = user_info.pop('user_id')
+    user_info.pop('username')
+    user_info.pop('restrictions')
+    # reqs = get_daily_requirement(user_info)
+    # TODO: PUT THIS BACK
+    daily_reqs = {'calories': 2300, 'protein': 34, 'fat': 44, 'carbs': 130, 'fiber': 15, 'vitamin_a': 600, 'vitamin_c': 45, 'vitamin_d': 600, 'vitamin_e': 11, 'vitamin_k': 55, 'vitamin_b6': 1.2, 'vitamin_b12': 2.4, 'iron': 8, 'calcium': 1300, 'magnesium': 240, 'zinc': 11, 'potassium': 4500, 'sodium': 1500, 'phosphorus': 1250}
+    adjustments = {}
+    # real_dict = ast.literal_eval(reqs)
+    # print(real_dict)
+    # daily_reqs = real_dict['daily_requirements']
+    # adjustments = real_dict['adjustments']
 
-#     print("Daily Requirements:", daily_reqs)
-#     print("Adjustments:", adjustments)
+    print("Daily Requirements:", daily_reqs)
+    print("Adjustments:", adjustments)
 
-#     db.save_daily_reqs(conn, user_id, daily_reqs)
-#     session['username'] = username
-#     # return username, adjustments
-#     return jsonify({'success': True})
-#     # return render_template('signup.html')
+    db.save_daily_reqs(conn, user_id, daily_reqs)
+    session['username'] = username
+    print("USername saved", session['username'])
+    # return username, adjustments
+    return jsonify({'success': True})
+    # return render_template('signup.html')
 
 # get nutritional info for a given meal
 def nutrition(eaten):
@@ -181,7 +206,16 @@ def get_daily_requirement(user_info):
 
 
 @app.route('/nutrient_breakdown/<username>/<recent_days>')
-def nutrient_breakdown(username, recent_days=1):
+def get_nutrient_breakdown(username, recent_days=1):
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    try:
+        rem_dict = nutrient_breakdown(username, recent_days)
+        return jsonify(rem_dict)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+def nutrient_breakdown(username, recent_days):
 
     user_id = get_user_id(username)
 
@@ -189,86 +223,103 @@ def nutrient_breakdown(username, recent_days=1):
     daily_req = db.get_daily_reqs(conn, user_id)[0]
 
     print("DAILY REQ", daily_req)
-
+    print(type(daily_req), daily_req)
+    new_daily_req = list(daily_req)
+    print(type(new_daily_req), new_daily_req)
+    print(new_daily_req[0])
     # remove the first two (rec_id and user_id)
-    new_daily_req = daily_req[2:]
+    new_daily_req = new_daily_req[2:]
     day = date.today()
     rem_dict = {}
     for k in range(len(NUTRIENTS)):
         rem_dict[NUTRIENTS[k]] = [0, new_daily_req[k] * 7, UNITS[k]]
-    for i in range(1, recent_days):
+    print("hi")
+    print("recent_days =", recent_days)
+    for i in range(0, recent_days):
         # add up all nutrients so far
-        if (i != 1):
-            day = date.today() - timedelta(days=i - 1)
+        print("here")
+        day = date.today() - timedelta(days=i)
 
         print(day.isoformat())
         meals_so_far = db.get_meals_for_day(conn, user_id, day.isoformat())
         print("MEALS SO FAR", meals_so_far)
         # remove the first three (meal_id, user_id, and date)
-        new_meals = [t[3:] for t in list(meals_so_far)]
+        if (len(meals_so_far) > 0):
+            new_meals = [t[3:] for t in list(meals_so_far)]
+            for meal in new_meals:
+                for j in range(len(NUTRIENTS)):
+                    rem_dict[NUTRIENTS[j]][0] += meal[j] if meal[j] is not None else 0
 
-        for meal in new_meals:
-            for j in range(len(NUTRIENTS)):
-                rem_dict[NUTRIENTS[j]][0] += meal[j] if meal[j] is not None else 0
     # display the remaining with the nutrients
     return rem_dict
 
-def get_user_id(conn, username):
+def get_user_id(username):
     user_info = db.get_user_info(conn, username)
     user_id = user_info['user_id']
     return user_id
 
 
 @app.route('/api/meal_suggestion', methods=['POST'])
-def get_meal_plan(conn, username):
-    # ask user for things they have in their fridge
-    ingredients = input("What ingredients do you have? Enter as a string separated by a comma and a single space. eg: oats, bananas, apples: ")
-    # get remaining nutrients from nutri_goals
-    rem_nutrients = nutrient_breakdown(username, recent_days=1)
-    # ask chat for:
-    # suggested meal, ideal meal, a sentence of feedback regarding groceries, and tips such as what to and not to consume to maximize absorption
-    prompt = f"""
-        Given these inputs:
-        - Ingredients: {ingredients}
-        - Nutritional requirements: {rem_nutrients}
-        generate:
+def get_meal_plan():
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
 
-        1. a suggested meal given the ingredients and nutritional requirements
-        2. an ideal meal for the nutritional requirements, ignoring ingredient constraints
-        3. a short evaluation of the ingredients in meeting the nutritional needs
-        4. 2 tips to achieve the nutritional requirements including how to achieve maximum 
-            absorption of needed nutrients 
+    data = request.get_json()
+    ingredients = data.get('ingredients', '').strip()
 
-        Return the response in the following JSON format:
+    try:
+        username = session['username']
+        # get remaining nutrients from nutri_goals
+        rem_nutrients = nutrient_breakdown(username, recent_days=1)
+        print("REM NUTRIENTS", rem_nutrients)
+        # ask chat for:
+        # suggested meal, ideal meal, a sentence of feedback regarding groceries, and tips such as what to and not to consume to maximize absorption
+        prompt = f"""
+            Given these inputs:
+            - Ingredients: {ingredients}
+            - Nutritional requirements: {rem_nutrients}
+            generate:
 
-        {{
-            "suggested_meal": "<string>",
-            "ideal_meal": "<string>",
-            "evaluation": "<string>",
-            "tips": ["<string>", "<string>"]
-        }}
-        """
+            1. a suggested meal given the ingredients and nutritional requirements
+            2. an ideal meal for the nutritional requirements, ignoring ingredient constraints
+            3. a short evaluation of the ingredients in meeting the nutritional needs and specific ingredients to buy to fulfill the specific nutritional requirements
+            5. 2 tips to achieve the nutritional requirements including how to achieve maximum 
+                absorption of needed nutrients 
 
-    url = "https://api.openai.com/v1/chat/completions"
-    api_key = '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'
+            Return the response in the following JSON format:
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+            {{
+                "suggested_meal": "<string>",
+                "ideal_meal": "<string>",
+                "evaluation": "<string>",
+                "tips": ["<string>", "<string>"]
+            }}
+            """
 
-    data = {
-        "model": "gpt-3.5-turbo",
-        "messages": [
-            {"role": "system", "content": prompt}
-        ]
-    }
+        url = "https://api.openai.com/v1/chat/completions"
+        api_key = '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'
 
-    response = requests.post(url, headers=headers, json=data)
-    response_json = response.json()
-    content = response_json['choices'][0]['message']['content']
-    content_dict = json.loads(content)
-    return content_dict
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+        data = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+                {"role": "system", "content": prompt}
+            ]
+        }
+        # TODO: comment this back in
+        response = requests.post(url, headers=headers, json=data)
+        response_json = response.json()
+        content = response_json['choices'][0]['message']['content']
+        print(content)
+        if isinstance(content, str):
+            content = json.loads(content)
+        return jsonify({'success': True, **content})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def validate_name(name):
     if name.isdigit():
@@ -292,112 +343,55 @@ def index():
     return render_template('index.html')
 
 
-# @app.route('/signup', methods=['GET', 'POST'])
-# def signup():
-#     if request.method == 'POST':
-#         data = request.get_json()
-
-#         try:
-#             # Basic validation
-#             username = data.get('username', '').strip()
-#             sex = data.get('sex', '').strip()
-#             age = data.get('age', '').strip()
-
-#             if not validate_name(username):
-#                 return jsonify({'success': False, 'error': 'Invalid username'})
-
-#             if db.user_in_db(conn, username):
-#                 return jsonify({'success': False, 'error': 'Username already exists'})
-
-#             if not sex_validation(sex):
-#                 return jsonify({'success': False, 'error': 'Sex must be M or F'})
-
-#             if not age_validation(age):
-#                 return jsonify({'success': False, 'error': 'Age must be a number'})
-
-#             # Create user
-#             db.add_new_user(conn,
-#                             username,
-#                             sex.upper(),
-#                             age,
-#                             data.get('allergies', ''),
-#                             data.get('conditions', ''),
-#                             data.get('medications', ''),
-#                             data.get('restrictions', ''),
-#                             data.get('nutri_goal', ''))
-
-#             # Generate daily requirements
-#             user_info = db.get_user_info(conn, username)
-#             user_id = user_info['user_id']
-#             reqs = get_daily_requirement(user_info)
-#             real_dict = ast.literal_eval(reqs)
-#             db.save_daily_reqs(conn, user_id, real_dict)
-
-#             session['username'] = username
-#             return jsonify({'success': True})
-
-#         except Exception as e:
-#             return jsonify({'success': False, 'error': str(e)})
-
-#     return render_template('signup.html')
-
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         data = request.get_json()
 
-        username = data.get('username', '').strip()
-        password = data.get('password', '').strip()
-
-        if not validate_name(username):
-            return jsonify({'success': False, 'error': 'Invalid username'})
-
-        if db.user_in_db(conn, username):
-            return jsonify({'success': False, 'error': 'Username already exists'})
-
-        # Add user with empty/default values for profile fields
-        db.add_new_user(conn, username, '', '', '', '', '', '', '')
-
-        # Save session
-        session['username'] = username
-        return jsonify({'success': True, 'redirect': '/one_time_setup'})
-
-    return render_template('signup.html')
-
-
-@app.route('/one_time_setup', methods=['GET', 'POST'])
-def one_time_setup():
-    if 'username' not in session:
-        return redirect(url_for('signup'))
-
-    if request.method == 'POST':
-        data = request.get_json()
-        username = session['username']
-
         try:
-            db.update_user_profile(
-                conn,
-                username,
-                sex=data.get('sex'),
-                age=data.get('age'),
-                allergies=data.get('allergies', ''),
-                conditions=data.get('conditions', ''),
-                medications=data.get('medications', ''),
-                restrictions=data.get('restrictions', ''),
-                nutri_goal=data.get('nutri_goal', '')
-            )
+            # Basic validation
+            username = data.get('username', '').strip()
+            sex = data.get('sex', '').strip()
+            age = data.get('age', '').strip()
 
+            if not validate_name(username):
+                return jsonify({'success': False, 'error': 'Invalid username'})
+
+            if db.user_in_db(conn, username):
+                return jsonify({'success': False, 'error': 'Username already exists'})
+
+            if not sex_validation(sex):
+                return jsonify({'success': False, 'error': 'Sex must be M or F'})
+
+            if not age_validation(age):
+                return jsonify({'success': False, 'error': 'Age must be a number'})
+
+            # Create user
+            db.add_new_user(conn,
+                            username,
+                            sex.upper(),
+                            age,
+                            data.get('allergies', ''),
+                            data.get('conditions', ''),
+                            data.get('medications', ''),
+                            data.get('restrictions', ''),
+                            data.get('nutri_goal', ''))
+
+            # Generate daily requirements
             user_info = db.get_user_info(conn, username)
             user_id = user_info['user_id']
             reqs = get_daily_requirement(user_info)
-            db.save_daily_reqs(conn, user_id, ast.literal_eval(reqs))
+            real_dict = ast.literal_eval(reqs)
+            db.save_daily_reqs(conn, user_id, real_dict)
 
+            session['username'] = username
+        
             return jsonify({'success': True})
+
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)})
 
-    return render_template('one_time_setup.html')   
+    return render_template('signup.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -429,23 +423,36 @@ def camera():
         return redirect(url_for('login'))
     return render_template('camera.html')
 
+# Debug route to check templates
+
 
 @app.route('/test-templates')
 def test_templates():
+    import os
     template_dir = os.path.join(app.root_path, 'templates')
     files = os.listdir(template_dir)
     return f"Template directory: {template_dir}<br>Files: {files}"
 
-
 # API ENDPOINTS
 
-@app.route('/api/log_meal', methods=['POST'])
+
+@app.route('/log_meal', methods=['POST'])
 def log_meal():
+    print("IN LOG MEAL")
     if 'username' not in session:
         return jsonify({'success': False, 'error': 'Not logged in'}), 401
 
     data = request.get_json()
-    meal_description = data.get('meal', '').strip()
+
+    print("Received meal data:", data)
+
+    meal_string_parts = []
+    for food, qty in data.items():
+        part = f"{qty} {food}".strip() if qty else food
+        meal_string_parts.append(part)
+
+    meal_description = ', '.join(meal_string_parts)
+    print("Meal string:", meal_description)
 
     if not meal_description:
         return jsonify({'success': False, 'error': 'Meal description required'}), 400
@@ -455,43 +462,8 @@ def log_meal():
         username = session['username']
         user_info = db.get_user_info(conn, username)
         user_id = user_info['user_id']
-
         db.add_meal(conn, user_id, nutrients)
         return jsonify({'success': True, 'message': 'Meal logged successfully'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/nutrient_breakdown')
-def get_nutrient_breakdown(username, recent_days=1):
-    if 'username' not in session:
-        return jsonify({'success': False, 'error': 'Not logged in'}), 401
-
-    try:
-        username = session['username']
-        user_id = db.get_user_info(conn, username)['user_id']
-
-        daily_req = db.get_daily_reqs(conn, user_id)[0]
-        new_daily_req = daily_req[2:]
-
-        today = date.today().isoformat()
-        meals_so_far = db.get_meals_for_today(conn, user_id, today)
-        new_meals = [t[3:] for t in list(meals_so_far)]
-
-        remaining = list(new_daily_req)
-        for meal in new_meals:
-            for i in range(len(remaining)):
-                if meal[i] is not None:
-                    remaining[i] = remaining[i] - int(meal[i])
-
-        formatted_nutrients = []
-        for i, nutrient in enumerate(NUTRIENTS):
-            formatted_nutrients.append({
-                'name': nutrient,
-                'amount': remaining[i],
-                'unit': UNITS[i]
-            })
-
-        return jsonify({'success': True, 'nutrients': formatted_nutrients})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -566,7 +538,9 @@ def identify_food():
 ]
 
     return jsonify(predicted_concepts=filtered_concepts)
+
         
+
 @app.route('/logout')
 def logout():
     session.clear()
@@ -580,3 +554,4 @@ def debug_routes():
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
     
+

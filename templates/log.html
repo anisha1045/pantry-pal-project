@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Meal Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            gap: 2rem;
+            padding: 2rem;
+            background: #f9f9f9;
+        }
+        .left, .right {
+            flex: 1;
+        }
+        .progress-container {
+            margin-bottom: 1.5rem;
+        }
+        .progress-label {
+            margin-bottom: 0.3rem;
+            font-weight: bold;
+        }
+        .progress-bar {
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+        }
+        .progress-bar div {
+            height: 100%;
+            background: #6a9cf9;
+        }
+
+        .food-item {
+    display: inline-block;
+    background: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin: 5px;
+}
+
+.food-item input.qty-input {
+    width: 40px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 10px;
+    padding: 2px 5px;
+    text-align: center;
+}
+.food-item span {
+    cursor: pointer;
+}
+
+
+        .box {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .box img {
+            width: 100%;
+            max-width: 200px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .btn-group input[type="radio"] {
+            display: none;
+        }
+        .btn-group label {
+            padding: 0.5rem 1rem;
+            border: 1px solid #6a9cf9;
+            background: white;
+            color: #6a9cf9;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 0 0.2rem;
+        }
+        .btn-group input[type="radio"]:checked + label {
+            background: #6a9cf9;
+            color: white;
+        }
+
+        /* Meal input sections */
+        #imageInputSection, #textInputSection {
+            display: none;
+            margin-top: 1rem;
+        }
+        #imageInputSection input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        #imagePreview img {
+            margin-top: 1rem;
+            max-width: 200px;
+            border-radius: 10px;
+        }
+
+        #foodInputs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        #foodInputs input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        #foodInputs button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #6a9cf9;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .food-item {
+            display: inline-flex;
+            align-items: center;
+            background: #eef;
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .food-item span {
+            margin-left: 0.5rem;
+            cursor: pointer;
+            color: #555;
+            font-weight: bold;
+        }
+        #submit-btn {
+            margin-top: 1.5rem;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            background: #6a9cf9;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="left">
+    <div class="progress-container">
+        <div class="progress-label">Calories</div>
+        <div class="progress-bar"><div style="width: 60%;"></div></div>
+    </div>
+    <div class="progress-container">
+        <div class="progress-label">Protein</div>
+        <div class="progress-bar"><div style="width: 40%;"></div></div>
+    </div>
+    <div class="progress-container">
+        <div class="progress-label">Carbs</div>
+        <div class="progress-bar"><div style="width: 70%;"></div></div>
+    </div>
+    <div class="progress-container">
+        <div class="progress-label">Fats</div>
+        <div class="progress-bar"><div style="width: 50%;"></div></div>
+    </div>
+</div>
+
+<div class="right">
+    <div class="box">
+        <h3>Log Your Meal</h3>
+        <div class="btn-group" role="group">
+            <input type="radio" id="textInput" name="inputMethod" checked>
+            <label for="textInput">Type Meal</label>
+            <input type="radio" id="imageInput" name="inputMethod">
+            <label for="imageInput">Upload Photo</label>
+        </div>
+
+        <div id="textInputSection">
+            <div id="foodInputs">
+                <input type="text" id="quantity" placeholder="Quantity (e.g. 2)">
+                <input type="text" id="food" placeholder="Food (e.g. eggs)">
+                <button onclick="addFood()">Enter</button>
+            </div>
+        </div>
+
+        <div id="imageInputSection">
+            <input type="file" id="mealImage" accept="image/*" capture="environment" onchange="previewImage(event)">
+            <div id="imagePreview" style="display:none;">
+                <img id="previewImg">
+            </div>
+        </div>
+        <div id="food-list"></div>
+        <button id="submit-btn" onclick="submitMeals()">Submit</button>
+    </div>
+</div>
+
+<script>
+    const textInput = document.getElementById('textInput');
+    const imageInput = document.getElementById('imageInput');
+    const textInputSection = document.getElementById('textInputSection');
+    const imageInputSection = document.getElementById('imageInputSection');
+
+    function updateInputDisplay() {
+        if (textInput.checked) {
+            textInputSection.style.display = 'block';
+            imageInputSection.style.display = 'none';
+        } else {
+            textInputSection.style.display = 'none';
+            imageInputSection.style.display = 'block';
+        }
+    }
+    textInput.onchange = updateInputDisplay;
+    imageInput.onchange = updateInputDisplay;
+    updateInputDisplay();
+
+    let meals = [];
+    function addFood() {
+        const qty = document.getElementById('quantity').value.trim();
+        const food = document.getElementById('food').value.trim();
+        if (!qty || !food) return;
+        meals.push({ qty, food });
+        renderFoods();
+        document.getElementById('quantity').value = '';
+        document.getElementById('food').value = '';
+    }
+
+    function renderFoods() {
+    const foodList = document.getElementById('food-list');
+    foodList.innerHTML = '';
+    meals.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'food-item';
+
+        // quantity input
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'text';
+        qtyInput.placeholder = 'Qty';
+        qtyInput.value = item.qty;
+        qtyInput.className = 'qty-input';
+        qtyInput.oninput = (e) => {
+            item.qty = e.target.value;
+        };
+
+        // food name
+        const foodName = document.createElement('span');
+        foodName.textContent = ` ${item.food} `;
+
+        // remove button
+        const x = document.createElement('span');
+        x.textContent = '×';
+        x.onclick = () => {
+            meals.splice(index, 1);
+            renderFoods();
+        };
+
+        div.appendChild(qtyInput);
+        div.appendChild(foodName);
+        div.appendChild(x);
+
+        foodList.appendChild(div);
+    });
+}
+
+async function submitMeals() {
+    // build dictionary of {food: quantity}
+    const mealData = {};
+    meals.forEach(item => {
+        mealData[item.food] = item.qty || "";
+    });
+
+    try {
+        const response = await fetch('/log_meal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(mealData)
+        });
+
+        if (response.ok) {
+            console.log("Meal logged successfully");
+            // maybe clear meals?
+            meals = [];
+            renderFoods();
+
+            // clear text inputs
+            document.getElementById('quantity').value = '';
+            document.getElementById('food').value = '';
+
+            // clear file input & image preview
+            document.getElementById('mealImage').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('previewImg').src = '';
+
+            meals = [];
+            renderFoods();
+        } else {
+            console.error("Logging failed");
+        }
+    } catch (err) {
+        console.error("Error submitting meal:", err);
+    }
+}
+
+    async function identifyImage(file) {
+        try {
+            const formData = new FormData();
+            formData.append('mealImage', file);
+
+            const response = await fetch('/identify_food', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                console.log("Upload succeeded");
+                const data = await response.json();
+                console.log(data)
+
+                data.predicted_concepts.forEach(concept => {
+                    meals.push({ qty: '', food: concept.name });
+                });
+
+                renderFoods();
+
+                return data;  // or do something with response
+            } else {
+                throw new Error("Upload failed");
+            }
+        } catch (err) {
+            console.error("Save cancelled or failed:", err);
+        }
+    }
+
+    function previewImage(event) {
+        const imgPreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        previewImg.src = URL.createObjectURL(event.target.files[0]);
+        imgPreview.style.display = 'block';
+        const file = document.getElementById('mealImage').files[0];
+        identifyImage(file)
+        .then(() => {
+            console.log("Save succeeded!");
+            alert("Image saved successfully!");
+        })
+        .catch(err => {
+            console.error("Save failed:", err);
+            alert("Failed to save image.");
+        });
+    }
+
+</script>
+
+</body>
+</html>

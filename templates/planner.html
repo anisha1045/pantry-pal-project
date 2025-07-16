@@ -1,287 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Meal Planner</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            gap: 2rem;
-            padding: 2rem;
-            background: #f9f9f9;
-        }
-        .left, .right {
-            flex: 1;
-        }
-        .progress-container {
-            margin-bottom: 1.5rem;
-        }
-        .progress-label {
-            margin-bottom: 0.3rem;
-            font-weight: bold;
-        }
-        .progress-bar {
-            background: #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-            height: 20px;
-        }
-        .progress-bar div {
-            height: 100%;
-            background: #6a9cf9;
-        }
-        .box {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .box img {
-            width: 100%;
-            max-width: 200px;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-        }
-        .btn-group input[type="radio"] {
-            display: none;
-        }
-        .btn-group label {
-            padding: 0.5rem 1rem;
-            border: 1px solid #6a9cf9;
-            background: white;
-            color: #6a9cf9;
-            cursor: pointer;
-            border-radius: 8px;
-            margin: 0 0.2rem;
-        }
-        .btn-group input[type="radio"]:checked + label {
-            background: #6a9cf9;
-            color: white;
-        }
-
-        /* Meal input sections */
-        #imageInputSection, #textInputSection {
-            display: none;
-            margin-top: 1rem;
-        }
-        #imageInputSection input {
-            width: 100%;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        #imagePreview img {
-            margin-top: 1rem;
-            max-width: 200px;
-            border-radius: 10px;
-        }
-
-        #foodInputs {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-        #foodInputs input {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        #foodInputs button {
-            padding: 0.5rem 1rem;
-            border: none;
-            background: #6a9cf9;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .food-item {
-            display: inline-flex;
-            align-items: center;
-            background: #eef;
-            padding: 0.5rem 1rem;
-            margin: 0.5rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
-        .food-item span {
-            margin-left: 0.5rem;
-            cursor: pointer;
-            color: #555;
-            font-weight: bold;
-        }
-        #submit-btn {
-            margin-top: 1.5rem;
-            padding: 0.7rem 1.5rem;
-            border: none;
-            background: #6a9cf9;
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Pantry Pal - Meal Planner" />
+    <meta name="author" content="Pantry Pal Team" />
+    <title>Meal Planner - Pantry Pal</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body>
-
-<div class="left">
-    <div class="progress-container">
-        <div class="progress-label">Calories</div>
-        <div class="progress-bar"><div style="width: 60%;"></div></div>
-    </div>
-    <div class="progress-container">
-        <div class="progress-label">Protein</div>
-        <div class="progress-bar"><div style="width: 40%;"></div></div>
-    </div>
-    <div class="progress-container">
-        <div class="progress-label">Carbs</div>
-        <div class="progress-bar"><div style="width: 70%;"></div></div>
-    </div>
-    <div class="progress-container">
-        <div class="progress-label">Fats</div>
-        <div class="progress-bar"><div style="width: 50%;"></div></div>
-    </div>
-</div>
-
-<div class="right">
-    <div class="box">
-        <h3>Log Your Meal</h3>
-        <div class="btn-group" role="group">
-            <input type="radio" id="textInput" name="inputMethod" checked>
-            <label for="textInput">Type Meal</label>
-            <input type="radio" id="imageInput" name="inputMethod">
-            <label for="imageInput">Upload Photo</label>
-        </div>
-
-        <div id="textInputSection">
-            <div id="foodInputs">
-                <input type="text" id="quantity" placeholder="Quantity (e.g. 2)">
-                <input type="text" id="food" placeholder="Food (e.g. eggs)">
-                <button onclick="addFood()">Enter</button>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container px-5">
+            <a class="navbar-brand" href="/">🥗 Pantry Pal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/signup">Sign Up</a></li>
+                </ul>
             </div>
-            <div id="food-list"></div>
         </div>
+    </nav>
 
-        <div id="imageInputSection">
-            <input type="file" id="mealImage" accept="image/*" capture="environment" onchange="previewImage(event)">
-            <div id="imagePreview" style="display:none;">
-                <img id="previewImg">
+    <!-- Page Content -->
+    <section class="py-5">
+        <div class="container px-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h2 class="fw-bolder mb-4 text-center">🍽️ Meal Planner</h2>
+                    <p class="text-muted text-center mb-4">Enter ingredients you have on hand, and we'll suggest a meal just for you.</p>
+                    <div class="mb-3">
+                        <label for="ingredientsInput" class="form-label fw-bold">Your Ingredients</label>
+                        <textarea class="form-control" id="ingredientsInput" rows="4" placeholder="e.g., spinach, eggs, avocado"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button class="btn btn-primary btn-lg" onclick="getMealSuggestion()">Get Meal Plan</button>
+                    </div>
+                    <div id="suggestionLoading" class="text-center text-muted mt-3" style="display: none;">
+                        <div class="spinner-border text-primary me-2" role="status"></div>Fetching meal suggestions...
+                    </div>
+                    <div id="suggestionResults" class="mt-4" style="display: none;"></div>
+                </div>
             </div>
-            <button style="margin-top: 1rem;" onclick="uploadMeal()">Upload Meal</button>
         </div>
+    </section>
 
-        <button id="submit-btn" onclick="submitMeals()">Submit</button>
-    </div>
-</div>
+    <!-- Footer -->
+    <footer class="py-4 bg-dark mt-auto">
+        <div class="container px-5">
+            <p class="m-0 text-center text-white">© Pantry Pal 2024</p>
+        </div>
+    </footer>
 
-<script>
-    const textInput = document.getElementById('textInput');
-    const imageInput = document.getElementById('imageInput');
-    const textInputSection = document.getElementById('textInputSection');
-    const imageInputSection = document.getElementById('imageInputSection');
-
-    function updateInputDisplay() {
-        if (textInput.checked) {
-            textInputSection.style.display = 'block';
-            imageInputSection.style.display = 'none';
-        } else {
-            textInputSection.style.display = 'none';
-            imageInputSection.style.display = 'block';
-        }
-    }
-    textInput.onchange = updateInputDisplay;
-    imageInput.onchange = updateInputDisplay;
-    updateInputDisplay();
-
-    let meals = [];
-    function addFood() {
-        const qty = document.getElementById('quantity').value.trim();
-        const food = document.getElementById('food').value.trim();
-        if (!qty || !food) return;
-        meals.push({ qty, food });
-        renderFoods();
-        document.getElementById('quantity').value = '';
-        document.getElementById('food').value = '';
-    }
-
-    function renderFoods() {
-        const foodList = document.getElementById('food-list');
-        foodList.innerHTML = '';
-        meals.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = 'food-item';
-            div.textContent = `${item.qty} ${item.food}`;
-            const x = document.createElement('span');
-            x.textContent = '×';
-            x.onclick = () => {
-                meals.splice(index, 1);
-                renderFoods();
-            };
-            div.appendChild(x);
-            foodList.appendChild(div);
-        });
-    }
-
-    function submitMeals() {
-        if (textInput.checked) {
-            console.log("Submitted typed meals:", meals);
-            alert("Typed meals submitted!");
-            meals = [];
-            renderFoods();
-        } else {
-            console.log("Submitted photo meal.");
-            alert("Meal photo submitted!");
-        }
-    }
-
-    async function identifyImage(file) {
-        try {
-            const formData = new FormData();
-            formData.append('mealImage', file);
-
-            const response = await fetch('/identify_food', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                console.log("Upload succeeded");
-                const data = await response.json();
-                return data;  // or do something with response
-            } else {
-                throw new Error("Upload failed");
+    <!-- JS -->
+    <script>
+        async function getMealSuggestion() {
+            const ingredients = document.getElementById('ingredientsInput').value.trim();
+            if (!ingredients) {
+                alert('Please enter some ingredients');
+                return;
             }
-        } catch (err) {
-            console.error("Save cancelled or failed:", err);
+
+            const loading = document.getElementById('suggestionLoading');
+            const results = document.getElementById('suggestionResults');
+            loading.style.display = 'block';
+            results.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/meal_suggestion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ingredients: ingredients })
+                });
+
+                const result = await response.json();
+                console.log(result);
+                if (result.success) {
+                    results.innerHTML = `
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white"><strong>Suggested Meal</strong></div>
+                            <div class="card-body">${result.suggested_meal}</div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header bg-info text-white"><strong>Ideal Meal</strong></div>
+                            <div class="card-body">${result.ideal_meal}</div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header bg-warning text-dark"><strong>Evaluation</strong></div>
+                            <div class="card-body">${result.evaluation}</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header bg-primary text-white"><strong>Tips</strong></div>
+                            <div class="card-body">
+                                <ul class="mb-0">${result.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>
+                            </div>
+                        </div>
+                    `;
+                    results.style.display = 'block';
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
         }
-    }
-
-    function previewImage(event) {
-        const imgPreview = document.getElementById('imagePreview');
-        const previewImg = document.getElementById('previewImg');
-        previewImg.src = URL.createObjectURL(event.target.files[0]);
-        imgPreview.style.display = 'block';
-        const file = document.getElementById('mealImage').files[0];
-        identifyImage(file)
-        .then(() => {
-            console.log("Save succeeded!");
-            alert("Image saved successfully!");
-        })
-        .catch(err => {
-            console.error("Save failed:", err);
-            alert("Failed to save image.");
-        });
-    }
-
-    function uploadMeal() {
-        alert("Meal image uploaded (mock).");
-    }
-</script>
-
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
