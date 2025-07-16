@@ -41,8 +41,10 @@ def callback():
         if user_in_db(conn, email):
             return redirect(url_for("dashboard"))
         else:
-            return redirect(url_for("signup"))  # or one_time_setup
-    
+            # Store the email in session
+            session['username'] = email
+            return redirect(url_for("one_time_setup_form"))
+
     except Exception as e:
         return f"Google OAuth failed: {str(e)}", 500
     

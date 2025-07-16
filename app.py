@@ -76,44 +76,44 @@ def check_user(username):
     return {'exists': user_exists}
 
 
-@app.route('/one_time_setup', methods=['POST'])
-def one_time_setup():
+# @app.route('/one_time_setup', methods=['POST'])
+# def one_time_setup():
 
-    data = request.get_json()
-    username = data.get('username')
-    sex = data.get('sex')
-    age = data.get('age')
-    allergies = data.get('allergies')
-    conditions = data.get('conditions')
-    medications = data.get('medications')
-    restrictions = data.get('restrictions')
-    nutri_goal = data.get('nutri_goal')
+#     data = request.get_json()
+#     username = data.get('username')
+#     sex = data.get('sex')
+#     age = data.get('age')
+#     allergies = data.get('allergies')
+#     conditions = data.get('conditions')
+#     medications = data.get('medications')
+#     restrictions = data.get('restrictions')
+#     nutri_goal = data.get('nutri_goal')
 
-    #add user to USER database
-    db.add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
+#     #add user to USER database
+#     db.add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
     
-    # add their daily requirments to daily_requirments database
-    user_info = db.get_user_info(conn, username)
-    user_id = user_info.pop('user_id')
-    user_info.pop('username')
-    user_info.pop('restrictions')
-    # reqs = get_daily_requirement(user_info)
-    # TODO: PUT THIS BACK
-    daily_reqs = {'calories': 2300, 'protein': 34, 'fat': 44, 'carbs': 130, 'fiber': 15, 'vitamin_a': 600, 'vitamin_c': 45, 'vitamin_d': 600, 'vitamin_e': 11, 'vitamin_k': 55, 'vitamin_b6': 1.2, 'vitamin_b12': 2.4, 'iron': 8, 'calcium': 1300, 'magnesium': 240, 'zinc': 11, 'potassium': 4500, 'sodium': 1500, 'phosphorus': 1250}
-    adjustments = {}
-    # real_dict = ast.literal_eval(reqs)
-    # print(real_dict)
-    # daily_reqs = real_dict['daily_requirements']
-    # adjustments = real_dict['adjustments']
+#     # add their daily requirments to daily_requirments database
+#     user_info = db.get_user_info(conn, username)
+#     user_id = user_info.pop('user_id')
+#     user_info.pop('username')
+#     user_info.pop('restrictions')
+#     # reqs = get_daily_requirement(user_info)
+#     # TODO: PUT THIS BACK
+#     daily_reqs = {'calories': 2300, 'protein': 34, 'fat': 44, 'carbs': 130, 'fiber': 15, 'vitamin_a': 600, 'vitamin_c': 45, 'vitamin_d': 600, 'vitamin_e': 11, 'vitamin_k': 55, 'vitamin_b6': 1.2, 'vitamin_b12': 2.4, 'iron': 8, 'calcium': 1300, 'magnesium': 240, 'zinc': 11, 'potassium': 4500, 'sodium': 1500, 'phosphorus': 1250}
+#     adjustments = {}
+#     # real_dict = ast.literal_eval(reqs)
+#     # print(real_dict)
+#     # daily_reqs = real_dict['daily_requirements']
+#     # adjustments = real_dict['adjustments']
 
-    print("Daily Requirements:", daily_reqs)
-    print("Adjustments:", adjustments)
+#     print("Daily Requirements:", daily_reqs)
+#     print("Adjustments:", adjustments)
 
-    db.save_daily_reqs(conn, user_id, daily_reqs)
-    session['username'] = username
-    # return username, adjustments
-    return jsonify({'success': True})
-    # return render_template('signup.html')
+#     db.save_daily_reqs(conn, user_id, daily_reqs)
+#     session['username'] = username
+#     # return username, adjustments
+#     return jsonify({'success': True})
+#     # return render_template('signup.html')
 
 # get nutritional info for a given meal
 def nutrition(eaten):
@@ -292,54 +292,112 @@ def index():
     return render_template('index.html')
 
 
+# @app.route('/signup', methods=['GET', 'POST'])
+# def signup():
+#     if request.method == 'POST':
+#         data = request.get_json()
+
+#         try:
+#             # Basic validation
+#             username = data.get('username', '').strip()
+#             sex = data.get('sex', '').strip()
+#             age = data.get('age', '').strip()
+
+#             if not validate_name(username):
+#                 return jsonify({'success': False, 'error': 'Invalid username'})
+
+#             if db.user_in_db(conn, username):
+#                 return jsonify({'success': False, 'error': 'Username already exists'})
+
+#             if not sex_validation(sex):
+#                 return jsonify({'success': False, 'error': 'Sex must be M or F'})
+
+#             if not age_validation(age):
+#                 return jsonify({'success': False, 'error': 'Age must be a number'})
+
+#             # Create user
+#             db.add_new_user(conn,
+#                             username,
+#                             sex.upper(),
+#                             age,
+#                             data.get('allergies', ''),
+#                             data.get('conditions', ''),
+#                             data.get('medications', ''),
+#                             data.get('restrictions', ''),
+#                             data.get('nutri_goal', ''))
+
+#             # Generate daily requirements
+#             user_info = db.get_user_info(conn, username)
+#             user_id = user_info['user_id']
+#             reqs = get_daily_requirement(user_info)
+#             real_dict = ast.literal_eval(reqs)
+#             db.save_daily_reqs(conn, user_id, real_dict)
+
+#             session['username'] = username
+#             return jsonify({'success': True})
+
+#         except Exception as e:
+#             return jsonify({'success': False, 'error': str(e)})
+
+#     return render_template('signup.html')
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         data = request.get_json()
 
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+
+        if not validate_name(username):
+            return jsonify({'success': False, 'error': 'Invalid username'})
+
+        if db.user_in_db(conn, username):
+            return jsonify({'success': False, 'error': 'Username already exists'})
+
+        # Add user with empty/default values for profile fields
+        db.add_new_user(conn, username, '', '', '', '', '', '', '')
+
+        # Save session
+        session['username'] = username
+        return jsonify({'success': True, 'redirect': '/one_time_setup'})
+
+    return render_template('signup.html')
+
+
+@app.route('/one_time_setup', methods=['GET', 'POST'])
+def one_time_setup():
+    if 'username' not in session:
+        return redirect(url_for('signup'))
+
+    if request.method == 'POST':
+        data = request.get_json()
+        username = session['username']
+
         try:
-            # Basic validation
-            username = data.get('username', '').strip()
-            sex = data.get('sex', '').strip()
-            age = data.get('age', '').strip()
+            db.update_user_profile(
+                conn,
+                username,
+                sex=data.get('sex'),
+                age=data.get('age'),
+                allergies=data.get('allergies', ''),
+                conditions=data.get('conditions', ''),
+                medications=data.get('medications', ''),
+                restrictions=data.get('restrictions', ''),
+                nutri_goal=data.get('nutri_goal', '')
+            )
 
-            if not validate_name(username):
-                return jsonify({'success': False, 'error': 'Invalid username'})
-
-            if db.user_in_db(conn, username):
-                return jsonify({'success': False, 'error': 'Username already exists'})
-
-            if not sex_validation(sex):
-                return jsonify({'success': False, 'error': 'Sex must be M or F'})
-
-            if not age_validation(age):
-                return jsonify({'success': False, 'error': 'Age must be a number'})
-
-            # Create user
-            db.add_new_user(conn,
-                            username,
-                            sex.upper(),
-                            age,
-                            data.get('allergies', ''),
-                            data.get('conditions', ''),
-                            data.get('medications', ''),
-                            data.get('restrictions', ''),
-                            data.get('nutri_goal', ''))
-
-            # Generate daily requirements
             user_info = db.get_user_info(conn, username)
             user_id = user_info['user_id']
             reqs = get_daily_requirement(user_info)
-            real_dict = ast.literal_eval(reqs)
-            db.save_daily_reqs(conn, user_id, real_dict)
+            db.save_daily_reqs(conn, user_id, ast.literal_eval(reqs))
 
-            session['username'] = username
             return jsonify({'success': True})
-
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)})
 
-    return render_template('signup.html')
+    return render_template('one_time_setup.html')   
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -371,18 +429,15 @@ def camera():
         return redirect(url_for('login'))
     return render_template('camera.html')
 
-# Debug route to check templates
-
 
 @app.route('/test-templates')
 def test_templates():
-    import os
     template_dir = os.path.join(app.root_path, 'templates')
     files = os.listdir(template_dir)
     return f"Template directory: {template_dir}<br>Files: {files}"
 
-# API ENDPOINTS
 
+# API ENDPOINTS
 
 @app.route('/api/log_meal', methods=['POST'])
 def log_meal():
@@ -511,9 +566,7 @@ def identify_food():
 ]
 
     return jsonify(predicted_concepts=filtered_concepts)
-
         
-
 @app.route('/logout')
 def logout():
     session.clear()

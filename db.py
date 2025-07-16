@@ -165,3 +165,12 @@ def get_daily_reqs(conn, user_id):
     c = conn.cursor()
     c.execute("SELECT * FROM daily_requirements WHERE user_id = ?", (user_id,))
     return c.fetchall()
+
+def update_user_profile(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal):
+    c = conn.cursor()
+    c.execute("""
+        UPDATE user_info
+        SET sex = ?, age = ?, allergies = ?, conditions = ?, medications = ?, restrictions = ?, nutri_goal = ?
+        WHERE username = ?
+    """, (sex, int(age), allergies, conditions, medications, restrictions, nutri_goal, username))
+    conn.commit()
