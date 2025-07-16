@@ -205,12 +205,13 @@ def get_daily_requirement(user_info):
     return returned_json
 
 
-@app.route('/nutrient_breakdown/<username>/<recent_days>')
-def get_nutrient_breakdown(username, recent_days=1):
+@app.route('/nutrient_breakdown/<recent_days>')
+def get_nutrient_breakdown(recent_days=1):
     if 'username' not in session:
         return jsonify({'success': False, 'error': 'Not logged in'}), 401
     try:
-        rem_dict = nutrient_breakdown(username, recent_days)
+        username = session['username']
+        rem_dict = nutrient_breakdown(username, int(recent_days))
         return jsonify(rem_dict)
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -251,12 +252,9 @@ def nutrient_breakdown(username, recent_days):
                     rem_dict[NUTRIENTS[j]][0] += meal[j] if meal[j] is not None else 0
 
     # display the remaining with the nutrients
+    print(rem_dict)
     return rem_dict
 
-def get_user_id(username):
-    user_info = db.get_user_info(conn, username)
-    user_id = user_info['user_id']
-    return user_id
 
 
 @app.route('/api/meal_suggestion', methods=['POST'])

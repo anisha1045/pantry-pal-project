@@ -6,7 +6,6 @@
     <title>Pantry Pal</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
     <!-- Navbar -->
@@ -17,35 +16,19 @@
             <a class="navbar-item" href="{{ url_for('planner') }}">Planner</a>
             <a class="navbar-item" href="{{ url_for('calendar') }}">Calendar</a>
             <a class="navbar-item" href="{{ url_for('library') }}">Library</a>
-            <!-- Sign In / Sign Out button -->
             {% if session.username %}
             <a class="navbar-item d-flex align-items-center" href="{{ url_for('logout') }}">
-                <img src="profile.jpg" alt="Profile" style="
-                    display: inline-block;
-                    width: 40px;
-                    height: 40px;
-                    background-color: white;
-                    border-radius: 50%;
-                    margin-right: 15px;
-                ">
+                <img src="profile.jpg" alt="Profile" style="width: 40px; height: 40px; background-color: white; border-radius: 50%; margin-right: 15px;">
                 Sign Out
             </a>
             {% else %}
             <a class="navbar-item d-flex align-items-center" href="{{ url_for('sign_in') }}">
-                <img src="profile.jpg" alt="Profile" style="
-                    display: inline-block;
-                    width: 40px;
-                    height: 40px;
-                    background-color: white;
-                    border-radius: 50%;
-                    margin-right: 15px;
-                ">
+                <img src="profile.jpg" alt="Profile" style="width: 40px; height: 40px; background-color: white; border-radius: 50%; margin-right: 15px;">
                 Sign In
             </a>
             {% endif %}
         </div>
     </nav>
-
 
     <!-- Header -->
     <header class="py-5 bg-light border-bottom mb-4">
@@ -63,123 +46,34 @@
                 <!-- Nutrient progress -->
                 <div class="card mb-4">
                     <div class="card-header">Today's Nutrients</div>
-                <div class="card-body">
-                    <p>Calories</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-primary" style="width: 50%;">50%</div>
+                    <div class="card-body" id="nutrient-progress-section">
+                        <p>Loading nutrients...</p>
                     </div>
-                    <p>Protein</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-warning" style="width: 80%;">80%</div>
+                    <div class="card-body">
+                        <p>Would you like a recipe to fulfill these requirements?</p>
+                        <a class="btn btn-primary" href="../html/planner">See Recipes</a>
                     </div>
-                    <p>Fat</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-danger" style="width: 60%;">60%</div>
-                    </div>
-                    <p>Carbs</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-info" style="width: 70%;">70%</div>
-                    </div>
-                    <p>Fiber</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" style="width: 40%;">40%</div>
-                    </div>
-                    <p>Vitamin A</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-primary" style="width: 55%;">55%</div>
-                    </div>
-                    <p>Vitamin C</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" style="width: 65%;">65%</div>
-                    </div>
-                    <p>Vitamin D</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-warning" style="width: 35%;">35%</div>
-                    </div>
-                    <p>Vitamin E</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-danger" style="width: 45%;">45%</div>
-                    </div>
-                    <p>Vitamin K</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-info" style="width: 50%;">50%</div>
-                    </div>
-                    <p>Vitamin B6</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" style="width: 60%;">60%</div>
-                    </div>
-                    <p>Vitamin B12</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-primary" style="width: 70%;">70%</div>
-                    </div>
-                    <p>Iron</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" style="width: 70%;">70%</div>
-                    </div>
-                    <p>Calcium</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-warning" style="width: 65%;">65%</div>
-                    </div>
-                    <p>Magnesium</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-info" style="width: 45%;">45%</div>
-                    </div>
-                    <p>Zinc</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-danger" style="width: 50%;">50%</div>
-                    </div>
-                    <p>Potassium</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" style="width: 55%;">55%</div>
-                    </div>
-                    <p>Sodium</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-warning" style="width: 60%;">60%</div>
-                    </div>
-                    <p>Phosphorus</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-info" style="width: 50%;">50%</div>
-                    </div>
-                    <p>Would you like a recipe to fulfill these requirements?</p>
-                    <a class="btn btn-primary" href="../html/planner">See Recipes</a>
-                </div>
                 </div>
             </div>
 
             <!-- Sidebar -->
             <div class="col-lg-4">
-                <!-- Absorption tips -->
                 <div class="card mb-4">
                     <div class="card-header">Today's Tip</div>
                     <div class="card-body">
                         Pair vitamin C-rich foods with iron sources for better absorption.
                     </div>
                 </div>
-                <!-- Weekly summary -->
                 <div class="card mb-4">
                     <div class="card-header">This Week</div>
                     <div class="card-body">
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" style="width: 85%;">Mon</div>
-                        </div>
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" style="width: 80%;">Tue</div>
-                        </div>
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" style="width: 75%;">Wed</div>
-                        </div>
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" style="width: 85%;">Thu</div>
-                        </div>
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" style="width: 88%;">Fri</div>
-                        </div>
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" style="width: 92%;">Sat</div>
-                        </div>
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" style="width: 87%;">Sun</div>
-                        </div>
+                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 85%;">Mon</div></div>
+                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 80%;">Tue</div></div>
+                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 75%;">Wed</div></div>
+                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 85%;">Thu</div></div>
+                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 88%;">Fri</div></div>
+                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 92%;">Sat</div></div>
+                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 87%;">Sun</div></div>
                     </div>
                 </div>
             </div>
@@ -193,7 +87,50 @@
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/scripts.js"></script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const section = document.getElementById("nutrient-progress-section");
+
+        const recentDays = 1;
+        try {
+            const res = await fetch(`/nutrient_breakdown/${recentDays}`);
+            const data = await res.json();
+            section.innerHTML = "";
+
+            for (const [nutrient, [consumed, total, unit]] of Object.entries(data)) {
+                const percentage = total === 0 ? 0 : Math.min((consumed / total) * 100, 100).toFixed(1);
+                const color = getColorForNutrient(nutrient);
+
+                const block = document.createElement("div");
+                block.innerHTML = `
+                    <p>${nutrient}</p>
+                    <div class="progress mb-3" title="${consumed} / ${total} ${unit}">
+                        <div class="progress-bar ${color}" style="width: ${percentage}%;">
+                            ${percentage}% ${unit}
+                        </div>
+                    </div>
+                `;
+                section.appendChild(block);
+            }
+        } catch (err) {
+            console.error("Failed to load nutrients:", err);
+            section.innerHTML = "<p>Unable to load nutrient data.</p>";
+        }
+
+        function getColorForNutrient(nutrient) {
+            const lower = nutrient.toLowerCase();
+            if (lower.includes("protein")) return "bg-warning";
+            if (lower.includes("fat")) return "bg-danger";
+            if (lower.includes("carb")) return "bg-info";
+            if (lower.includes("fiber")) return "bg-success";
+            if (lower.includes("vitamin")) return "bg-primary";
+            if (lower.includes("iron") || lower.includes("zinc")) return "bg-danger";
+            return "bg-success";
+        }
+    });
+    </script>
 </body>
 </html>
