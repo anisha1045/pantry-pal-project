@@ -490,11 +490,22 @@ def identify_food():
         print("%s %.2f" % (concept.name, concept.value))
         index -= 1
 
+#     filtered_concepts = [
+#     {"name": concept.name, "value": concept.value}
+#     for concept in output.data.concepts
+#     if concept.value > 0.5
+# ]
+
+    filtered_concepts = sorted(
+        output.data.concepts, key=lambda concept: concept.value, reverse=True
+    )[:5]
+
     filtered_concepts = [
-    {"name": concept.name, "value": concept.value}
-    for concept in output.data.concepts
-    if concept.value > 0.5
-]
+        {"name": concept.name, "value": concept.value}
+        for concept in filtered_concepts
+    ]
+    
+
 
     return jsonify(predicted_concepts=filtered_concepts)
 
