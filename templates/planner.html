@@ -72,18 +72,23 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container px-5">
-            <a class="navbar-brand" href="/">🥗 Pantry Pal</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/features">Features</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/signup">Sign Up</a></li>
-                </ul>
-            </div>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container d-flex align-items-center">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">🥗 Pantry Pal</a>
+            <a class="navbar-item" href="{{ url_for('log') }}">Log</a>
+            <a class="navbar-item" href="{{ url_for('planner') }}">Planner</a>
+            <a class="navbar-item" href="{{ url_for('library') }}">Library</a>
+            {% if session.username %}
+            <a class="navbar-item d-flex align-items-center" href="{{ url_for('logout') }}">
+                <img src="profile.jpg" alt="Profile" style="width: 40px; height: 40px; background-color: white; border-radius: 50%; margin-right: 15px;">
+                Sign Out
+            </a>
+            {% else %}
+            <a class="navbar-item d-flex align-items-center" href="{{ url_for('sign_in') }}">
+                <img src="profile.jpg" alt="Profile" style="width: 40px; height: 40px; background-color: white; border-radius: 50%; margin-right: 15px;">
+                Sign In
+            </a>
+            {% endif %}
         </div>
     </nav>
 
@@ -258,7 +263,7 @@
     <!-- Footer -->
     <footer class="py-4 bg-dark mt-auto">
         <div class="container px-5">
-            <p class="m-0 text-center text-white">© Pantry Pal 2024</p>
+            <p class="m-0 text-center text-white">© Pantry Pal 2025</p>
         </div>
     </footer>
 
