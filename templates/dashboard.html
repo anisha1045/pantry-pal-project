@@ -14,7 +14,6 @@
             <a class="navbar-brand" href="#!">🥗 Pantry Pal</a>
             <a class="navbar-item" href="{{ url_for('log') }}">Log</a>
             <a class="navbar-item" href="{{ url_for('planner') }}">Planner</a>
-            <a class="navbar-item" href="{{ url_for('calendar') }}">Calendar</a>
             <a class="navbar-item" href="{{ url_for('library') }}">Library</a>
             {% if session.username %}
             <a class="navbar-item d-flex align-items-center" href="{{ url_for('logout') }}">

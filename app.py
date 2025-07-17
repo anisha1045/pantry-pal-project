@@ -1,11 +1,10 @@
-app.py
-
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from auth import auth_bp
 import db
 import json
 import ast
 import requests
+import traceback
 from datetime import date, timedelta
 import os
 
@@ -61,12 +60,13 @@ def sign_in():
 
 @app.route('/hello')
 def hello():
-    print("hi")
     return "Hello from Flask!"
 
 
 def get_user_id(username):
     user_info = db.get_user_info(conn, username)
+    if not user_info:
+        return jsonify({'success': False, 'error': 'User not found'})
     user_id = user_info['user_id']
     return user_id
 
@@ -75,70 +75,6 @@ def check_user(username):
     # Check if a user exists in the database. Returns True if the user exists, False otherwise.
     user_exists = db.user_in_db(conn, username)
     return {'exists': user_exists}
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        data = request.get_json()
-
-        username = data.get('username', '').strip()
-        password = data.get('password', '').strip()
-
-        if not validate_name(username):
-            return jsonify({'success': False, 'error': 'Invalid username'})
-
-        if db.user_in_db(conn, username):
-            return jsonify({'success': False, 'error': 'Username already exists'})
-
-        # Add user with empty/default values for profile fields
-        db.add_new_user(conn, username, '', '', '', '', '', '', '')
-
-        # Save session
-        session['username'] = username
-        return jsonify({'success': True, 'redirect': '/one_time_setup'})
-
-    return render_template('signup.html')
-
-
-@app.route('/one_time_setup', methods=['POST'])
-def one_time_setup():
-
-    data = request.get_json()
-    username = data.get('username')
-    sex = data.get('sex')
-    age = data.get('age')
-    allergies = data.get('allergies')
-    conditions = data.get('conditions')
-    medications = data.get('medications')
-    restrictions = data.get('restrictions')
-    nutri_goal = data.get('nutri_goal')
-
-    #add user to USER database
-    db.add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
-    
-    # add their daily requirments to daily_requirments database
-    user_info = db.get_user_info(conn, username)
-    user_id = user_info.pop('user_id')
-    user_info.pop('username')
-    user_info.pop('restrictions')
-    # reqs = get_daily_requirement(user_info)
-    # TODO: PUT THIS BACK
-    daily_reqs = {'calories': 2300, 'protein': 34, 'fat': 44, 'carbs': 130, 'fiber': 15, 'vitamin_a': 600, 'vitamin_c': 45, 'vitamin_d': 600, 'vitamin_e': 11, 'vitamin_k': 55, 'vitamin_b6': 1.2, 'vitamin_b12': 2.4, 'iron': 8, 'calcium': 1300, 'magnesium': 240, 'zinc': 11, 'potassium': 4500, 'sodium': 1500, 'phosphorus': 1250}
-    adjustments = {}
-    # real_dict = ast.literal_eval(reqs)
-    # print(real_dict)
-    # daily_reqs = real_dict['daily_requirements']
-    # adjustments = real_dict['adjustments']
-
-    print("Daily Requirements:", daily_reqs)
-    print("Adjustments:", adjustments)
-
-    db.save_daily_reqs(conn, user_id, daily_reqs)
-    session['username'] = username
-    print("USername saved", session['username'])
-    # return username, adjustments
-    return jsonify({'success': True})
-    # return render_template('signup.html')
 
 # get nutritional info for a given meal
 def nutrition(eaten):
@@ -346,50 +282,63 @@ def signup():
     if request.method == 'POST':
         data = request.get_json()
 
-        try:
-            # Basic validation
-            username = data.get('username', '').strip()
-            sex = data.get('sex', '').strip()
-            age = data.get('age', '').strip()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
 
-            if not validate_name(username):
-                return jsonify({'success': False, 'error': 'Invalid username'})
+        if not validate_name(username):
+            return jsonify({'success': False, 'error': 'Invalid username'})
 
-            if db.user_in_db(conn, username):
-                return jsonify({'success': False, 'error': 'Username already exists'})
+        if db.user_in_db(conn, username):
+            return jsonify({'success': False, 'error': 'Username already exists'})
 
-            if not sex_validation(sex):
-                return jsonify({'success': False, 'error': 'Sex must be M or F'})
+        # Add user with empty/default values for profile fields
+        db.add_new_user(conn, username, '', '', '', '', '', '', '')
 
-            if not age_validation(age):
-                return jsonify({'success': False, 'error': 'Age must be a number'})
-
-            # Create user
-            db.add_new_user(conn,
-                            username,
-                            sex.upper(),
-                            age,
-                            data.get('allergies', ''),
-                            data.get('conditions', ''),
-                            data.get('medications', ''),
-                            data.get('restrictions', ''),
-                            data.get('nutri_goal', ''))
-
-            # Generate daily requirements
-            user_info = db.get_user_info(conn, username)
-            user_id = user_info['user_id']
-            reqs = get_daily_requirement(user_info)
-            real_dict = ast.literal_eval(reqs)
-            db.save_daily_reqs(conn, user_id, real_dict)
-
-            session['username'] = username
-        
-            return jsonify({'success': True})
-
-        except Exception as e:
-            return jsonify({'success': False, 'error': str(e)})
+        # Save session
+        session['username'] = username
+        return jsonify({'success': True, 'redirect': '/one_time_setup'})
 
     return render_template('signup.html')
+
+
+@app.route('/one_time_setup', methods=['GET', 'POST'])
+def one_time_setup():
+    if 'username' not in session:
+        return redirect(url_for('signup'))
+
+    if request.method == 'POST':
+        data = request.get_json()
+        username = session['username']
+
+        try:
+            db.update_user_profile(
+                conn,
+                username,
+                sex=data.get('sex'),
+                age=data.get('age'),
+                allergies=data.get('allergies', ''),
+                conditions=data.get('conditions', ''),
+                medications=data.get('medications', ''),
+                restrictions=data.get('restrictions', ''),
+                nutri_goal=data.get('nutri_goal', '')
+            )
+            print("Session username:", session.get('username'))
+            user_info = db.get_user_info(conn, username)
+            print("user_info = ", user_info)
+            if not user_info:
+                return jsonify({'success': False, 'error': 'User not found'})
+            user_id = user_info['user_id']
+            reqs = get_daily_requirement(user_info)
+            db.save_daily_reqs(conn, user_id, ast.literal_eval(reqs))
+
+            return jsonify({'success': True})
+        except Exception as e:
+            print("Error in one_time_setup:", e)
+            traceback.print_exc()  
+
+            return jsonify({'success': False, 'error': str(e)})
+
+    return render_template('one_time_setup.html')   
 
 
 @app.route('/login', methods=['GET', 'POST'])
