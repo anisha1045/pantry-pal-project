@@ -10,5 +10,9 @@ https://pantry-pal.atlassian.net/jira/software/projects/PP/boards/1?atlOrigin=ey
 
 Install dependencies:
 
-```bash
-pip install -r requirements.txt
+bash
+< pip install -r requirements.txt >
+
+## RUN
+python3 app.py
+
