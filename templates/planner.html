@@ -1,3 +1,4 @@
+planner.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,26 +10,79 @@
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+    
+        .btn-group label {
+            margin: 0 10px;
+            cursor: pointer;
+        }
+    
+        #foodInputs input {
+            margin: 5px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 45%;
+        }
+    
+        #foodInputs button {
+            margin-top: 5px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0d6efd;
+            color: white;
+        }
+    
+        .food-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+        }
+    
+        .food-item input.qty-input {
+            width: 60px;
+            margin-right: 10px;
+        }
+    
+        .food-item span {
+            margin-left: auto;
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #previewImg {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container d-flex align-items-center">
-            <a class="navbar-brand" href="#!">🥗 Pantry Pal</a>
-            <a class="navbar-item" href="{{ url_for('log') }}">Log</a>
-            <a class="navbar-item" href="{{ url_for('planner') }}">Planner</a>
-            <a class="navbar-item" href="{{ url_for('library') }}">Library</a>
-            {% if session.username %}
-            <a class="navbar-item d-flex align-items-center" href="{{ url_for('logout') }}">
-                <img src="profile.jpg" alt="Profile" style="width: 40px; height: 40px; background-color: white; border-radius: 50%; margin-right: 15px;">
-                Sign Out
-            </a>
-            {% else %}
-            <a class="navbar-item d-flex align-items-center" href="{{ url_for('sign_in') }}">
-                <img src="profile.jpg" alt="Profile" style="width: 40px; height: 40px; background-color: white; border-radius: 50%; margin-right: 15px;">
-                Sign In
-            </a>
-            {% endif %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container px-5">
+            <a class="navbar-brand" href="/">🥗 Pantry Pal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/signup">Sign Up</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -39,10 +93,148 @@
                 <div class="col-lg-8">
                     <h2 class="fw-bolder mb-4 text-center">🍽️ Meal Planner</h2>
                     <p class="text-muted text-center mb-4">Enter ingredients you have on hand, and we'll suggest a meal just for you.</p>
-                    <div class="mb-3">
-                        <label for="ingredientsInput" class="form-label fw-bold">Your Ingredients</label>
-                        <textarea class="form-control" id="ingredientsInput" rows="4" placeholder="e.g., spinach, eggs, avocado"></textarea>
+                    <div class="right">
+                        <div class="box">
+                            <div class="btn-group" role="group">
+                                <input type="radio" id="textInput" name="inputMethod" checked>
+                                <label for="textInput">Type Ingredients</label>
+                                <input type="radio" id="imageInput" name="inputMethod">
+                                <label for="imageInput">Upload Photo</label>
+                            </div>
+                    
+                            <div id="textInputSection">
+                                <div id="foodInputs">
+                                    <input type="text" id="quantity" placeholder="Quantity (e.g. 2)">
+                                    <input type="text" id="food" placeholder="Food (e.g. eggs)">
+                                    <button onclick="addFood()">Enter</button>
+                                </div>
+                            </div>
+                    
+                            <div id="imageInputSection">
+                                <input type="file" id="mealImage" accept="image/*" capture="environment" onchange="previewImage(event)">
+                                <div id="imagePreview" style="display:none;">
+                                    <img id="previewImg">
+                                </div>
+                            </div>
+                            <div id="food-list"></div>
+                        </div>
                     </div>
+                    
+                    <script>
+                        const textInput = document.getElementById('textInput');
+                        const imageInput = document.getElementById('imageInput');
+                        const textInputSection = document.getElementById('textInputSection');
+                        const imageInputSection = document.getElementById('imageInputSection');
+                    
+                        function updateInputDisplay() {
+                            if (textInput.checked) {
+                                textInputSection.style.display = 'block';
+                                imageInputSection.style.display = 'none';
+                            } else {
+                                textInputSection.style.display = 'none';
+                                imageInputSection.style.display = 'block';
+                            }
+                        }
+                        textInput.onchange = updateInputDisplay;
+                        imageInput.onchange = updateInputDisplay;
+                        updateInputDisplay();
+                    
+                        let meals = [];
+                        function addFood() {
+                            const qty = document.getElementById('quantity').value.trim();
+                            const food = document.getElementById('food').value.trim();
+                            if (!qty || !food) return;
+                            meals.push({ qty, food });
+                            renderFoods();
+                            document.getElementById('quantity').value = '';
+                            document.getElementById('food').value = '';
+                        }
+                    
+                        function renderFoods() {
+                        const foodList = document.getElementById('food-list');
+                        foodList.innerHTML = '';
+                        meals.forEach((item, index) => {
+                            const div = document.createElement('div');
+                            div.className = 'food-item';
+                    
+                            // quantity input
+                            const qtyInput = document.createElement('input');
+                            qtyInput.type = 'text';
+                            qtyInput.placeholder = 'Qty';
+                            qtyInput.value = item.qty;
+                            qtyInput.className = 'qty-input';
+                            qtyInput.oninput = (e) => {
+                                item.qty = e.target.value;
+                            };
+                    
+                            // food name
+                            const foodName = document.createElement('span');
+                            foodName.textContent = ` ${item.food} `;
+                    
+                            // remove button
+                            const x = document.createElement('span');
+                            x.textContent = '×';
+                            x.onclick = () => {
+                                meals.splice(index, 1);
+                                renderFoods();
+                            };
+                    
+                            div.appendChild(qtyInput);
+                            div.appendChild(foodName);
+                            div.appendChild(x);
+                    
+                            foodList.appendChild(div);
+                        });
+                    }
+                    
+                        async function identifyImage(file) {
+                            try {
+                                const formData = new FormData();
+                                formData.append('mealImage', file);
+                    
+                                const response = await fetch('/identify_food', {
+                                    method: 'POST',
+                                    body: formData
+                                });
+                    
+                                if (response.ok) {
+                                    console.log("Upload succeeded");
+                                    const data = await response.json();
+                                    console.log(data)
+                    
+                                    data.predicted_concepts.forEach(concept => {
+                                        meals.push({ qty: '', food: concept.name });
+                                    });
+                    
+                                    renderFoods();
+                    
+                                    return data;  // or do something with response
+                                } else {
+                                    throw new Error("Upload failed");
+                                }
+                            } catch (err) {
+                                console.error("Save cancelled or failed:", err);
+                            }
+                        }
+                    
+                        function previewImage(event) {
+                            const imgPreview = document.getElementById('imagePreview');
+                            const previewImg = document.getElementById('previewImg');
+                            previewImg.src = URL.createObjectURL(event.target.files[0]);
+                            imgPreview.style.display = 'block';
+                            const file = document.getElementById('mealImage').files[0];
+                            identifyImage(file)
+                            .then(() => {
+                                console.log("Save succeeded!");
+                                alert("Image saved successfully!");
+                            })
+                            .catch(err => {
+                                console.error("Save failed:", err);
+                                alert("Failed to save image.");
+                            });
+                        }
+                    
+                    </script>
                     <div class="d-grid">
                         <button class="btn btn-primary btn-lg" onclick="getMealSuggestion()">Get Meal Plan</button>
                     </div>
@@ -53,6 +245,7 @@
                 </div>
             </div>
         </div>
+        
     </section>
 
     <!-- Footer -->
@@ -65,57 +258,57 @@
     <!-- JS -->
     <script>
         async function getMealSuggestion() {
-            const ingredients = document.getElementById('ingredientsInput').value.trim();
-            if (!ingredients) {
-                alert('Please enter some ingredients');
-                return;
-            }
+    if (meals.length === 0) {
+        alert('Please enter or upload at least one ingredient.');
+        return;
+    }
 
-            const loading = document.getElementById('suggestionLoading');
-            const results = document.getElementById('suggestionResults');
-            loading.style.display = 'block';
-            results.style.display = 'none';
+    const loading = document.getElementById('suggestionLoading');
+    const results = document.getElementById('suggestionResults');
+    loading.style.display = 'block';
+    results.style.display = 'none';
 
-            try {
-                const response = await fetch('/api/meal_suggestion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ingredients: ingredients })
-                });
+    const ingredientsStr = meals.map(item => `${item.qty} ${item.food}`.trim()).join(', ');
 
-                const result = await response.json();
-                console.log(result);
-                if (result.success) {
-                    results.innerHTML = `
-                        <div class="card mb-3">
-                            <div class="card-header bg-success text-white"><strong>Suggested Meal</strong></div>
-                            <div class="card-body">${result.suggested_meal}</div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-header bg-info text-white"><strong>Ideal Meal</strong></div>
-                            <div class="card-body">${result.ideal_meal}</div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-header bg-warning text-dark"><strong>Evaluation</strong></div>
-                            <div class="card-body">${result.evaluation}</div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header bg-primary text-white"><strong>Tips</strong></div>
-                            <div class="card-body">
-                                <ul class="mb-0">${result.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>
-                            </div>
-                        </div>
-                    `;
-                    results.style.display = 'block';
-                } else {
-                    alert('Error: ' + result.error);
-                }
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                loading.style.display = 'none';
-            }
+    try {
+        const response = await fetch('/api/meal_suggestion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ingredients: ingredientsStr })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            results.innerHTML = `
+                <div class="card mb-3 border-success">
+                    <div class="card-header bg-success text-white"><strong>Suggested Meal</strong></div>
+                    <div class="card-body">${result.suggested_meal}</div>
+                </div>
+                <div class="card mb-3 border-info">
+                    <div class="card-header bg-info text-white"><strong>Ideal Meal</strong></div>
+                    <div class="card-body">${result.ideal_meal}</div>
+                </div>
+                <div class="card mb-3 border-warning">
+                    <div class="card-header bg-warning text-dark"><strong>Evaluation</strong></div>
+                    <div class="card-body">${result.evaluation}</div>
+                </div>
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white"><strong>Tips</strong></div>
+                    <div class="card-body">
+                        <ul class="mb-0">${result.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>
+                    </div>
+                </div>
+            `;
+            results.style.display = 'block';
+        } else {
+            alert('Error: ' + result.error);
         }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        loading.style.display = 'none';
+    }
+}
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
