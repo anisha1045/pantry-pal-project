@@ -9,6 +9,7 @@ import requests
 import traceback
 from datetime import date, timedelta
 import os
+import re
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -205,12 +206,21 @@ def get_meal_plan():
         # get remaining nutrients from nutri_goals
         rem_nutrients = nutrient_breakdown(username, recent_days=1)
         print("REM NUTRIENTS", rem_nutrients)
+
+
+        user_info = get_user_info(conn, username)
+        dietary_restrictions =  user_info['restrictions']
+        allergies = user_info['allergies']
+        medications = user_info['medications']
         # ask chat for:
         # suggested meal, ideal meal, a sentence of feedback regarding groceries, and tips such as what to and not to consume to maximize absorption
         prompt = f"""
             Given these inputs:
             - Ingredients: {ingredients}
             - Nutritional requirements: {rem_nutrients}
+            - Dietary restrictions: {dietary_restrictions}
+            - Allergies: {allergies}
+            - Medications: {medications}
             generate:
 
             1. a suggested meal given the ingredients and nutritional requirements
@@ -487,6 +497,45 @@ def identify_food():
 ]
 
     return jsonify(predicted_concepts=filtered_concepts)
+
+@app.route('/get_food_drug_advice', methods=['GET'])
+def get_food_drug_advice():
+    username = session['username']
+    drug_name = get_user_info(conn, username).get('medications', '').strip()
+    print("Drug name:", drug_name)
+    if not drug_name:
+        return jsonify({'success': False, 'error': 'No medication found for user'}), 400
+    api_key = 'secret_699038a1-a1de-4f70-8e63-308f2c8caf48'
+    url = f"https://www.britelink.io/api/v1/food_interactions?n={drug_name}&exact=true"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+    }
+
+    try:
+        r = requests.get(url, headers=headers, timeout=5)
+        r.raise_for_status()
+        data = r.json()
+
+        advice = None
+        for drug in data.get('foodInteractions', []):
+            for interaction in drug.get('interactions', []):
+                if isinstance(interaction, dict) and 'advice' in interaction:
+                    advice = interaction['advice']
+                    break
+            if advice:
+                break
+
+        if advice:
+            advice = re.sub(r'\.\s*,', '.', advice)
+            advice = drug_name + ": " + advice
+            return jsonify({'success': True, 'advice': advice})
+        else:
+            return jsonify({'success': False, 'error': 'No food interaction advice found'}), 404
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'error': 'API request failed', 'details': str(e)}), 500
+    except (ValueError, KeyError, TypeError) as e:
+        return jsonify({'success': False, 'error': 'Failed to parse response', 'details': str(e)}), 500
 
         
 
