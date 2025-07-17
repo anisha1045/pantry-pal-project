@@ -4,150 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Meal Planner</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            gap: 2rem;
-            padding: 2rem;
-            background: #f9f9f9;
-        }
-        .left, .right {
-            flex: 1;
-        }
-        .progress-container {
-            margin-bottom: 1.5rem;
-        }
-        .progress-label {
-            margin-bottom: 0.3rem;
-            font-weight: bold;
-        }
-        .progress-bar {
-            background: #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-            height: 20px;
-        }
-        .progress-bar div {
-            height: 100%;
-            background: #6a9cf9;
-        }
-
-        .food-item {
-    display: inline-block;
-    background: #f0f0f0;
-    padding: 5px 10px;
-    border-radius: 20px;
-    margin: 5px;
-}
-
-.food-item input.qty-input {
-    width: 40px;
-    margin-right: 5px;
-    border: none;
-    border-radius: 10px;
-    padding: 2px 5px;
-    text-align: center;
-}
-.food-item span {
-    cursor: pointer;
-}
-
-
-        .box {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .box img {
-            width: 100%;
-            max-width: 200px;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-        }
-        .btn-group input[type="radio"] {
-            display: none;
-        }
-        .btn-group label {
-            padding: 0.5rem 1rem;
-            border: 1px solid #6a9cf9;
-            background: white;
-            color: #6a9cf9;
-            cursor: pointer;
-            border-radius: 8px;
-            margin: 0 0.2rem;
-        }
-        .btn-group input[type="radio"]:checked + label {
-            background: #6a9cf9;
-            color: white;
-        }
-
-        /* Meal input sections */
-        #imageInputSection, #textInputSection {
-            display: none;
-            margin-top: 1rem;
-        }
-        #imageInputSection input {
-            width: 100%;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        #imagePreview img {
-            margin-top: 1rem;
-            max-width: 200px;
-            border-radius: 10px;
-        }
-
-        #foodInputs {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-        #foodInputs input {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        #foodInputs button {
-            padding: 0.5rem 1rem;
-            border: none;
-            background: #6a9cf9;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .food-item {
-            display: inline-flex;
-            align-items: center;
-            background: #eef;
-            padding: 0.5rem 1rem;
-            margin: 0.5rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
-        .food-item span {
-            margin-left: 0.5rem;
-            cursor: pointer;
-            color: #555;
-            font-weight: bold;
-        }
-        #submit-btn {
-            margin-top: 1.5rem;
-            padding: 0.7rem 1.5rem;
-            border: none;
-            background: #6a9cf9;
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans&family=Outfit&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -171,28 +30,26 @@
         </div>
     </nav>
 
-<div class="left">
-    <div class="progress-container">
-        <div class="progress-label">Calories</div>
-        <div class="progress-bar"><div style="width: 60%;"></div></div>
-    </div>
-    <div class="progress-container">
-        <div class="progress-label">Protein</div>
-        <div class="progress-bar"><div style="width: 40%;"></div></div>
-    </div>
-    <div class="progress-container">
-        <div class="progress-label">Carbs</div>
-        <div class="progress-bar"><div style="width: 70%;"></div></div>
-    </div>
-    <div class="progress-container">
-        <div class="progress-label">Fats</div>
-        <div class="progress-bar"><div style="width: 50%;"></div></div>
-    </div>
-</div>
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-lg-4 col-md-12">
+                <!-- Left column (Nutrition Facts) -->
+                <div class="card mb-4">
+                    <div class="card-header">Nutrition Facts</div>
+                    <div class="card-body" id="nutrient-progress-section">
+                        <p>Loading nutrition facts...</p>
+                    </div>
+                    <div class="card-body">
+                        <p>Would you like a recipe to fulfill these requirements?</p>
+                        <a class="btn btn-primary" href="../html/planner">See Recipes</a>
+                    </div>
+                </div>
+            </div>
 
-<div class="right">
-    <div class="box">
-        <h3>Log Your Meal</h3>
+            <div class="col-lg-8 col-md-12">
+                <!-- Right column (Meal form) -->
+                <div class="box">
+                    <h3>Log Your Meal</h3>
         <div class="btn-group" role="group">
             <input type="radio" id="textInput" name="inputMethod" checked>
             <label for="textInput">Type Meal</label>
@@ -218,8 +75,50 @@
         <button id="submit-btn" onclick="submitMeals()">Submit</button>
     </div>
 </div>
+</div>
+</div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const section = document.getElementById("nutrient-progress-section");
+
+        const recentDays = 1;
+        try {
+            const res = await fetch(`/nutrient_breakdown/${recentDays}`);
+            const data = await res.json();
+            section.innerHTML = "";
+
+            for (const [nutrient, [consumed, total, unit]] of Object.entries(data)) {
+                const percentage = total === 0 ? 0 : Math.min((consumed / total) * 100, 100).toFixed(1);
+                const color = getColorForNutrient(nutrient);
+
+                const block = document.createElement("div");
+                block.innerHTML = `
+                    <p>${nutrient}</p>
+                    <div class="progress mb-3" title="${consumed} / ${total} ${unit}">
+                        <div class="progress-bar ${color}" style="width: ${percentage}%;">
+                            ${percentage}% ${unit}
+                        </div>
+                    </div>
+                `;
+                section.appendChild(block);
+            }
+        } catch (err) {
+            console.error("Failed to load nutrients:", err);
+            section.innerHTML = "<p>Unable to load nutrient data.</p>";
+        }
+
+        function getColorForNutrient(nutrient) {
+            const lower = nutrient.toLowerCase();
+            if (lower.includes("protein")) return "bg-warning";
+            if (lower.includes("fat")) return "bg-danger";
+            if (lower.includes("carb")) return "bg-info";
+            if (lower.includes("fiber")) return "bg-success";
+            if (lower.includes("vitamin")) return "bg-primary";
+            if (lower.includes("iron") || lower.includes("zinc")) return "bg-danger";
+            return "bg-success";
+        }
+    });
     const textInput = document.getElementById('textInput');
     const imageInput = document.getElementById('imageInput');
     const textInputSection = document.getElementById('textInputSection');

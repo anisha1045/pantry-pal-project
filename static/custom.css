@@ -1,0 +1,80 @@
+/* === Fonts === */
+body {
+    font-family: 'Outfit', 'DM Sans', sans-serif;
+    background-color: rgb(251, 246, 227); /* main background */
+    color: rgb(54, 54, 54); /* primary text color */
+}
+
+h1 {
+    font-weight: bold;
+}
+
+h3 {
+    color:  rgb(218, 50, 93)!important;
+    font-weight: bold;
+}
+
+/* === Text Colors === */
+.text-primary { color:rgb(54, 54, 54) !important; }
+.text-secondary { color:  rgb(218, 50, 93)!important; }
+.text-accent { color: rgb(218, 50, 93) !important; }
+
+/* === Backgrounds === */
+.bg-primary { background-color: rgb(5, 104, 84) !important; }
+.bg-accent { background-color: rgb(218, 50, 93) !important; }
+.bg-light-green { background-color: rgb(194, 207, 152) !important; }
+.bg-orange { background-color: rgb(245, 138, 94) !important; }
+.bg-yellow { background-color: rgb(249, 212, 95) !important; }
+
+.navbar {
+    background-color: rgb(5, 104, 84) !important; /* deep green */
+}
+.navbar a, .navbar-brand {
+    color: white !important;
+}
+
+/* === Buttons === */
+.btn-primary {
+    background-color: rgb(218, 50, 93);
+    border-color: rgb(218, 50, 93);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: rgb(194, 45, 85);
+    border-color: rgb(194, 45, 85);
+}
+
+/* === Links === */
+a {
+    color: rgb(5, 104, 84);
+}
+a:hover {
+    color: rgb(218, 50, 93);
+}
+
+/* Optional: utility classes */
+.accent-border {
+    border-color: rgb(218, 50, 93) !important;
+}
+
+.card {
+    border: 1px solid rgb(239, 222, 180);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+#previewImg {
+    max-width: 200px;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+    display: block;
+    margin-top: 10px;
+}
+
+#imagePreview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}

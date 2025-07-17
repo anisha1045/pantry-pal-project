@@ -169,7 +169,7 @@ def nutrient_breakdown(username, recent_days):
     day = date.today()
     rem_dict = {}
     for k in range(len(NUTRIENTS)):
-        rem_dict[NUTRIENTS[k]] = [0, new_daily_req[k] * 7, UNITS[k]]
+        rem_dict[NUTRIENTS[k]] = [0, new_daily_req[k] * recent_days, UNITS[k]]
     print("hi")
     print("recent_days =", recent_days)
     for i in range(0, recent_days):
