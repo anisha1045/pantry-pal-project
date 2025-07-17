@@ -88,10 +88,11 @@ def user_in_db(conn, username):
 def add_new_user(conn, username, sex, age, allergies, conditions, medications, restrictions, nutri_goal):
     c = conn.cursor()
     try:
+        age_val = int(age) if str(age).isdigit() else None
         c.execute("""
             INSERT INTO user_info (username, sex, age, allergies, conditions, medications, restrictions, nutri_goal)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (username, sex, int(age), allergies, str(conditions), medications, restrictions, nutri_goal))
+        """, (username, sex, age_val, allergies, str(conditions), medications, restrictions, nutri_goal))
         conn.commit()
     except Exception as e:
         print("Error adding user:", e)

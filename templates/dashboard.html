@@ -1,3 +1,4 @@
+dashboard.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans&family=Outfit&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
     <!-- Navbar -->
@@ -67,14 +70,25 @@
                 </div>
                 <div class="card mb-4">
                     <div class="card-header">This Week</div>
-                    <div class="card-body">
-                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 85%;">Mon</div></div>
-                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 80%;">Tue</div></div>
-                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 75%;">Wed</div></div>
-                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 85%;">Thu</div></div>
-                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 88%;">Fri</div></div>
-                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 92%;">Sat</div></div>
-                        <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 87%;">Sun</div></div>
+                    <div class="card-body text-center">
+                
+                        <!-- Circular Progress Chart -->
+                        <canvas id="weeklyProgressChart" width="150" height="150"></canvas>
+                        <p id="weekly-summary-text" class="mt-3">
+                            You met your nutrient goals in <strong>12 out of 19</strong> nutrients (63%).
+                        </p>
+                
+                        <!-- Nutrient Highlights -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h6 class="text-success">Best Nutrients</h6>
+                                <ul id="best-nutrients" class="list-unstyled mb-0"></ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-danger">Needs Improvement</h6>
+                                <ul id="worst-nutrients" class="list-unstyled mb-0"></ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -131,7 +145,82 @@
             if (lower.includes("iron") || lower.includes("zinc")) return "bg-danger";
             return "bg-success";
         }
+
+        const res = await fetch(`/nutrient_breakdown/${recentDays}`);
+    const data = await res.json();
+
+    const percentages = [];
+    const nutrientNames = Object.keys(data);
+
+    nutrientNames.forEach(nutrient => {
+        const [consumed, remaining] = data[nutrient];
+        const goal = consumed + remaining;
+        const percent = goal > 0 ? (consumed / goal) * 100 : 0;
+        percentages.push({ nutrient, percent });
     });
+
+    // Count nutrients that met at least 80% of the goal
+    const metGoals = percentages.filter(n => n.percent >= 80);
+    const metCount = metGoals.length;
+    const totalCount = percentages.length;
+    const metPercentage = Math.round((metCount / totalCount) * 100);
+    document.getElementById('weekly-summary-text').innerHTML =
+    `You met your nutrient goals in <strong>${metCount} out of ${totalCount}</strong> nutrients (${metPercentage}%).`;
+
+    // Sort nutrients by performance
+    const sorted = [...percentages].sort((a, b) => b.percent - a.percent);
+    const best = sorted.slice(0, 2);
+    const worst = sorted.slice(-2).reverse();
+
+    // Update donut chart text
+    const ctx = document.getElementById('weeklyProgressChart').getContext('2d');
+    Chart.getChart(ctx)?.destroy(); // Remove old chart if exists
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Met Goal', 'Not Met'],
+            datasets: [{
+                data: [metCount, totalCount - metCount],
+                backgroundColor: ['#28a745', '#e9ecef'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false },
+                centerText: {
+                    text: `${metPercentage}%`
+                }
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            beforeDraw(chart) {
+                const { width, height, ctx } = chart;
+                ctx.restore();
+                const fontSize = (height / 5).toFixed(2);
+                ctx.font = `${fontSize}px sans-serif`;
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#000';
+                const text = `${metPercentage}%`;
+                const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                const textY = height / 2;
+                ctx.fillText(text, textX, textY);
+                ctx.save();
+            }
+        }]
+    });
+
+    // Update nutrient lists
+    const bestList = document.querySelector('#best-nutrients');
+    const worstList = document.querySelector('#worst-nutrients');
+    bestList.innerHTML = best.map(n => `<li>✔️ ${n.nutrient} (${Math.round(n.percent)}%)</li>`).join('');
+    worstList.innerHTML = worst.map(n => `<li>⚠️ ${n.nutrient} (${Math.round(n.percent)}%)</li>`).join('');
+    });
+
     </script>
 </body>
 </html>

@@ -1,7 +1,8 @@
 # auth.py
 from flask import Blueprint, redirect, request, session, url_for
 from requests_oauthlib import OAuth2Session
-from db import user_in_db, get_connection
+from db import user_in_db, add_new_user
+from db_conn import conn
 import os
 import os
 
@@ -41,18 +42,17 @@ def callback():
         email = userinfo.get("email")
         session['username'] = email   
 
-        # Check if user exists in DB
-        conn = get_connection(test_mode=False)
+        if not user_in_db(conn, email):
+            # Add user with empty/default profile fields
+            print("Adding new user: ", email)
+            add_new_user(conn, email, '', '', '', '', '', '', '')
+            print("Added successfully.")
 
-        if user_in_db(conn, email):
-            return redirect(url_for("dashboard"))
-        else:
-            # Store the email in session
-            session['username'] = email
-            return redirect(url_for("one_time_setup"))
+        return redirect(url_for("one_time_setup"))
 
     except Exception as e:
         return f"Google OAuth failed: {str(e)}", 500
+
     
 
 

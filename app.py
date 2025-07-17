@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from auth import auth_bp
-import db
+from db_conn import conn
+from db import update_user_profile, get_user_info, add_meal, user_in_db, get_daily_reqs, \
+               get_meals_for_day, add_new_user, save_daily_reqs
 import json
 import ast
 import requests
@@ -26,9 +28,6 @@ NUTRIENTS = ["calories", "protein", "fat", "carbs", "fiber", "vitamin_a", "vitam
  "vitamin_b6", "vitamin_b12", "iron", "calcium", "magnesium", "zinc", "potassium", "sodium", "phosphorus"]
 UNITS = ["kcal", "g", "g", "g", "g", "µg", "mg", "µg", "mg", "µg", "mg", "µg", "mg", "mg", "mg", "mg", "mg", "mg", "mg"]
 ATTR_IDS = [208, 203, 204, 205, 291, 318, 401, 324, 323, 430, 415, 418, 303, 301, 304, 309, 306, 307, 305]
-
-con = db.get_connection(test_mode=False)
-conn = db.setup_db(con)
 
 @app.route('/')
 def home():
@@ -64,7 +63,7 @@ def hello():
 
 
 def get_user_id(username):
-    user_info = db.get_user_info(conn, username)
+    user_info = get_user_info(conn, username)
     if not user_info:
         return jsonify({'success': False, 'error': 'User not found'})
     user_id = user_info['user_id']
@@ -73,7 +72,7 @@ def get_user_id(username):
 @app.route('/check_user/<username>')
 def check_user(username):
     # Check if a user exists in the database. Returns True if the user exists, False otherwise.
-    user_exists = db.user_in_db(conn, username)
+    user_exists = user_in_db(conn, username)
     return {'exists': user_exists}
 
 # get nutritional info for a given meal
@@ -157,7 +156,7 @@ def nutrient_breakdown(username, recent_days):
     user_id = get_user_id(username)
 
     # get the user's daily requirements
-    daily_req = db.get_daily_reqs(conn, user_id)[0]
+    daily_req = get_daily_reqs(conn, user_id)[0]
 
     print("DAILY REQ", daily_req)
     print(type(daily_req), daily_req)
@@ -178,7 +177,7 @@ def nutrient_breakdown(username, recent_days):
         day = date.today() - timedelta(days=i)
 
         print(day.isoformat())
-        meals_so_far = db.get_meals_for_day(conn, user_id, day.isoformat())
+        meals_so_far = get_meals_for_day(conn, user_id, day.isoformat())
         print("MEALS SO FAR", meals_so_far)
         # remove the first three (meal_id, user_id, and date)
         if (len(meals_so_far) > 0):
@@ -288,11 +287,11 @@ def signup():
         if not validate_name(username):
             return jsonify({'success': False, 'error': 'Invalid username'})
 
-        if db.user_in_db(conn, username):
+        if user_in_db(conn, username):
             return jsonify({'success': False, 'error': 'Username already exists'})
 
         # Add user with empty/default values for profile fields
-        db.add_new_user(conn, username, '', '', '', '', '', '', '')
+        add_new_user(conn, username, '', '', '', '', '', '', '')
 
         # Save session
         session['username'] = username
@@ -311,7 +310,7 @@ def one_time_setup():
         username = session['username']
 
         try:
-            db.update_user_profile(
+            update_user_profile(
                 conn,
                 username,
                 sex=data.get('sex'),
@@ -323,13 +322,16 @@ def one_time_setup():
                 nutri_goal=data.get('nutri_goal', '')
             )
             print("Session username:", session.get('username'))
-            user_info = db.get_user_info(conn, username)
+            user_info = get_user_info(conn, username)
             print("user_info = ", user_info)
             if not user_info:
                 return jsonify({'success': False, 'error': 'User not found'})
             user_id = user_info['user_id']
             reqs = get_daily_requirement(user_info)
-            db.save_daily_reqs(conn, user_id, ast.literal_eval(reqs))
+            reqs_dict = ast.literal_eval(reqs)
+            daily_reqs = reqs_dict['daily_requirements']
+            save_daily_reqs(conn, user_id, daily_reqs)
+
 
             return jsonify({'success': True})
         except Exception as e:
@@ -347,7 +349,7 @@ def login():
         data = request.get_json()
         username = data.get('username', '').strip()
 
-        if db.user_in_db(conn, username):
+        if user_in_db(conn, username):
             session['username'] = username
             return jsonify({'success': True})
         else:
@@ -407,9 +409,9 @@ def log_meal():
     try:
         nutrients = nutrition(meal_description)
         username = session['username']
-        user_info = db.get_user_info(conn, username)
+        user_info = get_user_info(conn, username)
         user_id = user_info['user_id']
-        db.add_meal(conn, user_id, nutrients)
+        add_meal(conn, user_id, nutrients)
         return jsonify({'success': True, 'message': 'Meal logged successfully'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
