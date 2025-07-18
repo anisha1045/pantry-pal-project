@@ -12,7 +12,8 @@ auth_bp = Blueprint('auth', __name__)
 # OAuth2 config
 client_id = "1157250652-tmr0ju9g9a3rb0vosg3r3v9ipi45hv86.apps.googleusercontent.com"
 client_secret = "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"
-redirect_uri = "http://127.0.0.1:5000/auth/callback"
+redirect_uri = "https://pantrypal.pythonanywhere.com/auth/callback"
+#redirect_uri = "http://127.0.0.1:5000/auth/callback"
 #redirect_uri = "http://localhost:5000/auth/callback"
 #redirect_uri = "http://localhost:5000/callback"
 
