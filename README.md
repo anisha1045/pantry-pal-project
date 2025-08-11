@@ -1,18 +1,22 @@
-# Pantry Pal
+## Pantry Pal
 
-Pantry Pal is a nutrition helper that helps you log your meals, and gives you nutrition recommendations personalized to you. 
+Pantry Pal is a full-stack AI-powered micronutrient tracker designed to help you log food effortlessly and optimize your nutrition. Upload pictures of your meals to get detailed nutrient breakdowns and discover recipes tailored specifically to your nutritional needs based on what you have in your pantry.
 
-## Link to Jira Board
-https://pantry-pal.atlassian.net/jira/software/projects/PP/boards/1?atlOrigin=eyJpIjoiNTJkMTJiNzc1NjFkNGYwZmE5YTdlYWI2ZGI0MzgxNDYiLCJwIjoiaiJ9
+## Features
+- Food logging with pictures: Easily upload photos of your meals or pantry items.
+- Nutrient breakdowns: Receive detailed micronutrient analysis using AI-powered APIs.
+- Personalized recipe suggestions: Get recipes customized to your nutritional requirements and pantry inventory.
+- Secure authentication: Sign in safely via Google OAuth.
 
+## Technologies Used
+- Backend: Python (Flask)
+- Database: SQLite3
+- Frontend: HTML, JavaScript, CSS
+- APIs: OpenAI, ClarifAI, Nutritionix, Google OAuth
 
-## Setup
+## Usage
 
-Install dependencies:
+Pantry Pal is deployed on PythonAnywhere. You can access the live app [here](https://pantrypal.pythonanywhere.com):
 
-bash
-< pip install -r requirements.txt >
-
-## RUN
-python3 app.py
-
+## Contact
+For questions or collaboration, reach out to us at: anishabhaskartorres@gmail.com(mailto:anishabhaskartorres@gmail.com) or [yarashobut2@gmail.com](mailto:yarashobut2@gmail.com) 
