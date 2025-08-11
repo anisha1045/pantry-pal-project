@@ -19,4 +19,4 @@ Pantry Pal is a full-stack AI-powered micronutrient tracker designed to help you
 Pantry Pal is deployed on PythonAnywhere. You can access the live app [here](https://pantrypal.pythonanywhere.com):
 
 ## Contact
-For questions or collaboration, reach out to us at: anishabhaskartorres@gmail.com(mailto:anishabhaskartorres@gmail.com) or [yarashobut2@gmail.com](mailto:yarashobut2@gmail.com) 
+For questions or collaboration, reach out to us at: [anishabhaskartorres@gmail.com](mailto:anishabhaskartorres@gmail.com) or [yarashobut2@gmail.com](mailto:yarashobut2@gmail.com) 
